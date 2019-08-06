@@ -3,12 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mateolegi</groupId>
     <artifactId>despliegues-audiencias</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <organization>
-        <!-- Used as the 'Vendor' for JNLP generation -->
-        <name>Quipux</name>
-    </organization>
+    <version>0.2.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -88,4 +83,29 @@
             </plugin>
         </plugins>
     </build>
+
+    <organization>
+        <!-- Used as the 'Vendor' for JNLP generation -->
+        <name>Quipux</name>
+        <url>https://www.quipux.com/web</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitLab</system>
+        <url>https://git.quipux.com/mateo.leal/despliegues-audiencias/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <name>Mateo Leal</name>
+            <email>mateo.leal@quipux.com</email>
+            <organization>Quipux</organization>
+            <organizationUrl>https://www.quipux.com/web</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://git.quipux.com/mateo.leal/despliegues-audiencias</url>
+        <connection>scm:git:https://git.quipux.com/mateo.leal/despliegues-audiencias.git</connection>
+    </scm>
 </project>
