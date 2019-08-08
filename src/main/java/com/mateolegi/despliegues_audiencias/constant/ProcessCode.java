@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias;
+package com.mateolegi.despliegues_audiencias.constant;
 
 /**
  * Constantes para los códigos de errores de los

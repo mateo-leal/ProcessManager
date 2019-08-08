@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.controller;
+package com.mateolegi.despliegues_audiencias;
 
 import com.mateolegi.despliegues_audiencias.process.*;
 import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;

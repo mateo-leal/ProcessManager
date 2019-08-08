@@ -1,13 +1,17 @@
-package com.mateolegi.despliegues_audiencias;
+package com.mateolegi.despliegues_audiencias.util;
 
+import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
+import static com.mateolegi.despliegues_audiencias.constant.Constants.CONF_PROPERTIES;
 import static javafx.scene.control.Alert.AlertType.ERROR;
 
 public class Configuration {
@@ -17,8 +21,7 @@ public class Configuration {
 
     public Configuration() {
         try {
-            InputStream stream = new FileInputStream("conf.properties");
-            PROPERTIES.load(stream);
+            loadPropertiesFile();
         } catch (IOException e) {
             LOGGER.error("Error abriendo el archivo conf.properties", e);
             Platform.runLater(() -> {
@@ -37,5 +40,10 @@ public class Configuration {
 
     public String getFrontDirectory() {
         return PROPERTIES.getProperty("front.path");
+    }
+
+    private void loadPropertiesFile() throws IOException {
+        InputStream inputStream = new FileInputStream(CONF_PROPERTIES);
+        PROPERTIES.load(inputStream);
     }
 }

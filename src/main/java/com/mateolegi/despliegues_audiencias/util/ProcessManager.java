@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias;
+package com.mateolegi.despliegues_audiencias.util;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;

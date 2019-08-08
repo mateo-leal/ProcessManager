@@ -1,8 +1,9 @@
-package com.mateolegi.despliegues_audiencias.process;
+package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.Configuration;
-import com.mateolegi.despliegues_audiencias.ProcessCode;
-import com.mateolegi.despliegues_audiencias.ProcessManager;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
+import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
+import com.mateolegi.despliegues_audiencias.util.ProcessManager;
+import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.DeployNumbers.getDeploymentVersion;
-import static com.mateolegi.despliegues_audiencias.ProcessManager.*;
+import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.getDeploymentVersion;
+import static com.mateolegi.despliegues_audiencias.util.ProcessManager.*;
 
 /**
  * Realiza el proceso de compresión de los archivos ubicados en
