@@ -1,8 +1,8 @@
 package com.mateolegi.despliegues_audiencias.process;
 
-import com.mateolegi.despliegues_audiencias.util.Configuration;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
-import com.mateolegi.despliegues_audiencias.util.ProcessCode;
+import com.mateolegi.despliegues_audiencias.Configuration;
+import com.mateolegi.despliegues_audiencias.ProcessManager;
+import com.mateolegi.despliegues_audiencias.ProcessCode;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.*;
+import static com.mateolegi.despliegues_audiencias.ProcessManager.*;
 
 public class FrontGeneration implements RunnableProcess {
 

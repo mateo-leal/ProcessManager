@@ -1,9 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process;
 
-import com.mateolegi.despliegues_audiencias.util.Configuration;
-import com.mateolegi.despliegues_audiencias.util.ProcessCode;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
-import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
+import com.mateolegi.despliegues_audiencias.Configuration;
+import com.mateolegi.despliegues_audiencias.ProcessCode;
+import com.mateolegi.despliegues_audiencias.ProcessManager;
+import com.mateolegi.despliegues_audiencias.DeployNumbers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

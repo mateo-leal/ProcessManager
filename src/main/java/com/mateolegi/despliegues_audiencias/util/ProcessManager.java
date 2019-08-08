@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.despliegues_audiencias;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,8 +14,10 @@ public class ProcessManager {
     private final ProcessBuilder builder;
 
     public static void setValue(String value) {
-
-        Platform.runLater(() -> STRING_PROPERTY.setValue(value));
+        try {
+            Platform.runLater(() -> STRING_PROPERTY.setValue(value));
+        } catch (IllegalStateException ignored) {
+        }
     }
 
     public ProcessManager(String... commands) {

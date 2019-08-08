@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.despliegues_audiencias;
 
 public class DeployNumbers {
 

@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.despliegues_audiencias;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.Properties;
 
-import static com.mateolegi.despliegues_audiencias.util.ProcessCode.CONF_FILE_NOT_FOUND;
 import static javafx.scene.control.Alert.AlertType.ERROR;
 
 public class Configuration {
@@ -26,7 +25,7 @@ public class Configuration {
                 Alert alert = new Alert(ERROR, "No se encontró el archivo conf.properties");
                 alert.showAndWait().ifPresent(buttonType -> {
                     Platform.exit();
-                    System.exit(CONF_FILE_NOT_FOUND);
+                    System.exit(ProcessCode.CONF_FILE_NOT_FOUND);
                 });
             });
         }

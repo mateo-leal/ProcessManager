@@ -1,6 +1,10 @@
-package com.mateolegi.despliegues_audiencias;
+package com.mateolegi.despliegues_audiencias.controller;
 
 import com.mateolegi.despliegues_audiencias.process.*;
+import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;
+import com.mateolegi.despliegues_audiencias.process.impl.CompressionProcess;
+import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
+import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcess;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
