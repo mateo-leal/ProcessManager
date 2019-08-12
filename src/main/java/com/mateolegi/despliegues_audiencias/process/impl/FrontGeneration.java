@@ -1,9 +1,8 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
+import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ProcessManager;
-import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,9 @@ import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.*;
+import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.FRONT_GENERATION;
+import static com.mateolegi.despliegues_audiencias.util.ProcessManager.SH;
+import static com.mateolegi.despliegues_audiencias.util.ProcessManager.setValue;
 
 public class FrontGeneration implements RunnableProcess {
 
@@ -88,6 +89,9 @@ public class FrontGeneration implements RunnableProcess {
     }
 
     private int moveDeployFolder(int resp) {
+        if (resp != 0) {
+            return FRONT_GENERATION;
+        }
         LOGGER.debug("Se mueve la carpeta de despliegues del las fuentes de front a la carpeta de despliegues.");
         setValue("Moviendo la carpeta de deploy de las fuentes de front a la carpeta de despliegues...");
         var deployFolder = new File(frontDirectory, "deploy");
@@ -104,6 +108,9 @@ public class FrontGeneration implements RunnableProcess {
     }
 
     private int renameDeployFolder(int resp) {
+        if (resp != 0) {
+            return FRONT_GENERATION;
+        }
         LOGGER.debug("Se renombra la carpeta de despliegues de deploy a html/backoffice");
         setValue("Renombrando carpeta de despliegues de deploy a html/backoffice");
         var deployFolder = new File(outputDirectory, "deploy");
@@ -114,11 +121,13 @@ public class FrontGeneration implements RunnableProcess {
                 return resp;
             }
         }
-        return ProcessCode.FRONT_GENERATION;
+        return FRONT_GENERATION;
     }
 
     private CompletableFuture<Integer> unzipDeploy(int resp) {
-        assert resp == 0;
+        if (resp != 0) {
+            return CompletableFuture.supplyAsync(() -> FRONT_GENERATION);
+        }
         LOGGER.debug("Inicia la descompresión del zip generado por el front.");
         setValue("Descomprimiendo zip generado por el front...");
         return CompletableFuture.supplyAsync(()
@@ -127,6 +136,9 @@ public class FrontGeneration implements RunnableProcess {
     }
 
     private int deleteZip(int resp) {
+        if (resp != 0) {
+            return FRONT_GENERATION;
+        }
         LOGGER.debug("Se elimina el zip generado por el front anteriormente");
         setValue("Eliminando zip generado por el front...");
         var htmlFolder = new File(outputDirectory, "html");
@@ -134,12 +146,12 @@ public class FrontGeneration implements RunnableProcess {
         if (sdFrontZip.delete()) {
             return resp;
         }
-        return ProcessCode.FRONT_GENERATION;
+        return FRONT_GENERATION;
     }
 
     @SuppressWarnings("SameReturnValue")
     private int handleError(Throwable error) {
         LOGGER.error("Ocurrió un error durante la generación del front", error);
-        return ProcessCode.FRONT_GENERATION;
+        return FRONT_GENERATION;
     }
 }

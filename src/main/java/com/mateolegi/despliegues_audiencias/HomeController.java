@@ -55,9 +55,13 @@ public class HomeController {
     private void setData() {
         LOGGER.debug("Se setean los datos");
         setDeploymentVersion(deploymentVersionField.getText().trim());
+        LOGGER.debug("Deployment version: " + getDeploymentVersion());
         setAudienciasVersion(audienciasVersionField.getText().trim());
+        LOGGER.debug("Audiencias version: " + getAudienciasVersion());
         setDeploymentNumber(deploymentNumberField.getText().trim());
+        LOGGER.debug("Deployment number: " + getDeploymentNumber());
         setBackofficeVersion(backOfficeVersionField.getText().trim());
+        LOGGER.debug("Backoffice version: " + getBackofficeVersion());
         progressBar.setProgress(progressBar.getProgress() + 0.04);
     }
 

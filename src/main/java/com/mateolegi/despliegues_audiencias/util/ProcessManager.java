@@ -2,6 +2,8 @@ package com.mateolegi.despliegues_audiencias.util;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,15 +14,20 @@ public class ProcessManager {
     public static final String SH = "C:\\Program Files\\Git\\bin\\sh.exe";
     public static final SimpleStringProperty STRING_PROPERTY = new SimpleStringProperty();
     private final ProcessBuilder builder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessManager.class);
 
     public static void setValue(String value) {
         try {
             Platform.runLater(() -> STRING_PROPERTY.setValue(value));
-        } catch (IllegalStateException ignored) {
+        } catch (IllegalStateException e) {
+            LOGGER.warn(e.getMessage());
         }
     }
 
     public ProcessManager(String... commands) {
+        if (commands.length == 0) {
+            throw new IllegalArgumentException("Commands are required.");
+        }
         builder = new ProcessBuilder(commands)
                 .redirectErrorStream(true)
                 .inheritIO();

@@ -36,20 +36,22 @@ class TestProcess {
         var configuration = new Configuration();
         var outputDirectory = new File(configuration.getOutputDirectory());
         var testZip = new File(outputDirectory, "Test.zip");
-        if (testZip.exists()) {
-            testZip.delete();
-        }
+        assert !testZip.exists() || testZip.delete();
     }
 
     @AfterAll
     static void deleteGitBranch() {
+        File outputDir = new File(new Configuration().getOutputDirectory());
         int respGitPush = new ProcessManager(ProcessManager.SH, "-c", "git push origin :Test")
+                .withDirectory(outputDir)
                 .startAndWait();
         assert respGitPush == 0;
         int respGitCheckout = new ProcessManager(ProcessManager.SH, "-c", "git checkout master")
+                .withDirectory(outputDir)
                 .startAndWait();
         assert respGitCheckout == 0;
         int respGitBranch = new ProcessManager(ProcessManager.SH, "-c", "git branch -D Test")
+                .withDirectory(outputDir)
                 .startAndWait();
         assert respGitBranch == 0;
     }

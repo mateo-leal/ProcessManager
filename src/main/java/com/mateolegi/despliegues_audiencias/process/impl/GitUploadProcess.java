@@ -1,15 +1,17 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
-import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
 import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
+import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
+import com.mateolegi.despliegues_audiencias.util.ProcessManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
+
+import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.GIT_ERROR;
 
 public class GitUploadProcess implements RunnableProcess {
 
@@ -29,7 +31,7 @@ public class GitUploadProcess implements RunnableProcess {
     @Override
     public CompletableFuture<Integer> start() {
         return gitCheckoutMaster()
-                .thenComposeAsync(this::gitNewBranch)
+                .thenCompose(this::gitNewBranch)
                 .thenComposeAsync(this::gitAdd)
                 .thenComposeAsync(this::gitCommit)
                 .thenComposeAsync(this::gitPush);
@@ -46,23 +48,29 @@ public class GitUploadProcess implements RunnableProcess {
     }
 
     private CompletableFuture<Integer> gitNewBranch(int resp) {
+        if (resp != 0) {
+            return CompletableFuture.supplyAsync(() -> GIT_ERROR);
+        }
         LOGGER.debug("Creamos la rama para la versión de despliegue");
         ProcessManager.setValue("Creando la rama...");
-        assert resp == 0;
         return getProcess("git checkout -b " + DeployNumbers.getDeploymentVersion());
     }
 
     private CompletableFuture<Integer> gitAdd(int resp) {
+        if (resp != 0) {
+            return CompletableFuture.supplyAsync(() -> GIT_ERROR);
+        }
         LOGGER.debug("Adicionamos el zip generado");
         ProcessManager.setValue("Adicionando los cambios...");
-        assert resp == 0;
         return getProcess("git add " + DeployNumbers.getDeploymentVersion() + ".zip");
     }
 
     private CompletableFuture<Integer> gitCommit(int resp) {
+        if (resp != 0) {
+            return CompletableFuture.supplyAsync(() -> GIT_ERROR);
+        }
         LOGGER.debug("Damos commit a los cambios");
         ProcessManager.setValue("Confirmando los cambios...");
-        assert resp == 0;
         var command = "git commit -m 'Backoffice " +
                 DeployNumbers.getBackofficeVersion() + ", Audiencias " +
                 DeployNumbers.getAudienciasVersion() + " despliegue " +
@@ -71,9 +79,11 @@ public class GitUploadProcess implements RunnableProcess {
     }
 
     private CompletableFuture<Integer> gitPush(int resp) {
+        if (resp != 0) {
+            return CompletableFuture.supplyAsync(() -> GIT_ERROR);
+        }
         LOGGER.debug("Subimos al repositorio");
         ProcessManager.setValue("Subiendo al repositorio de despliegues...");
-        assert resp == 0;
         return getProcess("git push origin " + DeployNumbers.getDeploymentVersion());
     }
 
