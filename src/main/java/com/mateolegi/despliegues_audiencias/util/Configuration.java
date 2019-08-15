@@ -42,6 +42,38 @@ public class Configuration {
         return PROPERTIES.getProperty("front.path");
     }
 
+    public boolean mustUploadGit() {
+        return Boolean.parseBoolean(PROPERTIES.getProperty("git.upload"));
+    }
+
+    public boolean mustSSHDeploy() {
+        return Boolean.parseBoolean(PROPERTIES.getProperty("ssh.deploy"));
+    }
+
+    public String getSSHUser() {
+        return PROPERTIES.getProperty("ssh.user");
+    }
+
+    public String getSSHPassword() {
+        return PROPERTIES.getProperty("ssh.password");
+    }
+
+    public String getSSHHost() {
+        return PROPERTIES.getProperty("ssh.host");
+    }
+
+    public int getSSHPort() {
+        return Integer.parseInt(PROPERTIES.getProperty("ssh.port"));
+    }
+
+    public String getGitUser() {
+        return PROPERTIES.getProperty("git.user");
+    }
+
+    public String getGitPassword() {
+        return PROPERTIES.getProperty("git.password");
+    }
+
     private void loadPropertiesFile() throws IOException {
         InputStream inputStream = new FileInputStream(CONF_PROPERTIES);
         PROPERTIES.load(inputStream);

@@ -1,6 +1,6 @@
 package com.mateolegi.despliegues_audiencias;
 
-import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
+import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;
 import com.mateolegi.despliegues_audiencias.process.impl.CompressionProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
@@ -70,7 +70,7 @@ class TestProcess {
         });
     }
 
-    private static void test(RunnableProcess process)
+    private static void test(AsyncProcess process)
             throws ExecutionException, InterruptedException {
         assertThat(process.prepare(), is(true));
         CompletableFuture<Integer> future = process.start();

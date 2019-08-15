@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
  * Representa un proceso que se puede ejecutar en segundo plano y
  * al final retorna una respuesta en un número entero.
  */
-public interface RunnableProcess {
+public interface AsyncProcess {
 
     /**
      * Prepara los archivos y realiza las respectivas validaciones

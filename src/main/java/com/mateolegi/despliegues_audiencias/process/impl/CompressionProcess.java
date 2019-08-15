@@ -3,7 +3,7 @@ package com.mateolegi.despliegues_audiencias.process.impl;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
 import com.mateolegi.despliegues_audiencias.util.ProcessManager;
-import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
+import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import static com.mateolegi.despliegues_audiencias.util.ProcessManager.*;
  * los directorios del jar de audiencias, el front y si existe
  * el jar de backoffice.
  */
-public class CompressionProcess implements RunnableProcess {
+public class CompressionProcess implements AsyncProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompressionProcess.class);
 

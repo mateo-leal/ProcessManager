@@ -1,7 +1,7 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
+import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
 import com.mateolegi.despliegues_audiencias.util.ProcessManager;
@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.GIT_ERROR;
 
-public class GitUploadProcess implements RunnableProcess {
+public class GitUploadProcess implements AsyncProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitUploadProcess.class);
 

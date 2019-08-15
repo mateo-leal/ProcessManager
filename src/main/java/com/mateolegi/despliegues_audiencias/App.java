@@ -23,7 +23,7 @@ public class App extends Application {
     }
 
     private static Parent loadFXML() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(HOME_FXML));
+        var fxmlLoader = new FXMLLoader(App.class.getResource(HOME_FXML));
         return fxmlLoader.load();
     }
 

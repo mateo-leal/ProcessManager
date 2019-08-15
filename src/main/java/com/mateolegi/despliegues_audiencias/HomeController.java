@@ -5,6 +5,7 @@ import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;
 import com.mateolegi.despliegues_audiencias.process.impl.CompressionProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
 import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcess;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,7 @@ import static javafx.scene.control.ButtonType.OK;
 public class HomeController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
+    private static final Configuration CONFIGURATION = new Configuration();
 
     @FXML private TextField deploymentVersionField;
     @FXML private TextField audienciasVersionField;
@@ -43,11 +45,13 @@ public class HomeController {
         setData();
         var button = (Button) event.getSource();
         button.setDisable(true);
-        CompletableFuture.allOf(
+        CompletableFuture<Integer> future = CompletableFuture.allOf(
                 generateAudienciasJar(), generateFront()
-        ).thenComposeAsync(aVoid -> compressFiles())
-         .thenComposeAsync(integer -> gitProcess())
-         .whenCompleteAsync((o, o2) -> Platform.runLater(()
+        ).thenComposeAsync(aVoid -> compressFiles());
+        if (CONFIGURATION.mustUploadGit()) {
+             future.thenComposeAsync(integer -> gitProcess());
+        }
+        future.whenComplete((o, o2) -> Platform.runLater(()
                 -> new Alert(INFORMATION, "La generación del despliegue ha fallado correctamente",
                 OK).showAndWait().ifPresent(buttonType -> limpiarVentana())));
     }
@@ -92,7 +96,7 @@ public class HomeController {
         return runProcess(new GitUploadProcess());
     }
 
-    private CompletableFuture<Integer> runProcess(RunnableProcess process) {
+    private CompletableFuture<Integer> runProcess(AsyncProcess process) {
         if (process.prepare()) {
             return process.start()
                     .thenRunAsync(this::incrementProgressBar)

@@ -5,9 +5,8 @@ import javafx.beans.property.SimpleStringProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.util.Objects;
 
 public class ProcessManager {
 
@@ -15,6 +14,7 @@ public class ProcessManager {
     public static final SimpleStringProperty STRING_PROPERTY = new SimpleStringProperty();
     private final ProcessBuilder builder;
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessManager.class);
+    private OutputStream outputStream = null;
 
     public static void setValue(String value) {
         try {
@@ -28,9 +28,7 @@ public class ProcessManager {
         if (commands.length == 0) {
             throw new IllegalArgumentException("Commands are required.");
         }
-        builder = new ProcessBuilder(commands)
-                .redirectErrorStream(true)
-                .inheritIO();
+        builder = new ProcessBuilder(commands);
     }
 
     public ProcessManager withDirectory(File directory) {
@@ -38,13 +36,45 @@ public class ProcessManager {
         return this;
     }
 
+    public ProcessManager withOutput(OutputStream out) {
+        this.outputStream = out;
+        return this;
+    }
+
     public int startAndWait() {
         try {
-            return builder.start().waitFor();
+            if (Objects.isNull(outputStream)) {
+                builder.inheritIO();
+            }
+            Process p = builder.start();
+            if (Objects.nonNull(outputStream)) {
+                syncOutputs(p.getInputStream());
+            }
+            return p.waitFor();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private void syncOutputs(InputStream processOutput) {
+        new Thread(() -> {
+            try {
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = processOutput.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, len);
+                }
+            } catch (IOException e) {
+                LOGGER.error("Error sincronizando salidas.", e);
+            } finally {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    LOGGER.error("Error cerrando outputstream.", e);
+                }
+            }
+        }).start();
     }
 }

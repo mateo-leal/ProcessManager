@@ -1,6 +1,6 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.process.RunnableProcess;
+import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ProcessManager;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +17,7 @@ import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.FRONT_GE
 import static com.mateolegi.despliegues_audiencias.util.ProcessManager.SH;
 import static com.mateolegi.despliegues_audiencias.util.ProcessManager.setValue;
 
-public class FrontGeneration implements RunnableProcess {
+public class FrontGeneration implements AsyncProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FrontGeneration.class);
 

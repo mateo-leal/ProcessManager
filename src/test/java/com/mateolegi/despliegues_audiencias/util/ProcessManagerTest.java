@@ -11,7 +11,7 @@ class ProcessManagerTest {
     }
 
     @Test
-    void test_startAndWait_when_constructor_empty() {
+    void test_when_constructor_empty() {
         assertThrows(IllegalArgumentException.class, ProcessManager::new);
     }
 }
