@@ -42,14 +42,6 @@ public class Configuration {
         return PROPERTIES.getProperty("front.path");
     }
 
-    public boolean mustUploadGit() {
-        return Boolean.parseBoolean(PROPERTIES.getProperty("git.upload"));
-    }
-
-    public boolean mustSSHDeploy() {
-        return Boolean.parseBoolean(PROPERTIES.getProperty("ssh.deploy"));
-    }
-
     public String getSSHUser() {
         return PROPERTIES.getProperty("ssh.user");
     }
@@ -72,6 +64,10 @@ public class Configuration {
 
     public String getGitPassword() {
         return PROPERTIES.getProperty("git.password");
+    }
+
+    public String getWebVersionService() {
+        return PROPERTIES.getProperty("web.version-service");
     }
 
     private void loadPropertiesFile() throws IOException {
