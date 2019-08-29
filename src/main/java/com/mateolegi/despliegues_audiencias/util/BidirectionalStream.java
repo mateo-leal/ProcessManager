@@ -9,7 +9,7 @@ import java.io.PipedOutputStream;
 
 public class BidirectionalStream implements AutoCloseable {
 
-    private PipedInputStream in;
+    private final PipedInputStream in;
     private PipedOutputStream out;
 
     public BidirectionalStream() throws IOException {
