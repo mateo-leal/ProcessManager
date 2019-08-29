@@ -20,9 +20,6 @@ public class SSHConnectionManager implements AutoCloseable {
     private static final Configuration CONFIGURATION = new Configuration();
     private static final Logger LOGGER = LoggerFactory.getLogger(SSHConnectionManager.class);
 
-    /**
-     *
-     */
     private Session session;
 
     private final String username = CONFIGURATION.getSSHUser();
@@ -56,7 +53,7 @@ public class SSHConnectionManager implements AutoCloseable {
         channel.setInputStream(System.in);
         channel.setOutputStream(System.out);
         var in = channel.getInputStream();
-        channel.connect();
+        channel.connect(60000);
         var ret = getChannelOutput(channel, in);
         channel.disconnect();
         return ret;
