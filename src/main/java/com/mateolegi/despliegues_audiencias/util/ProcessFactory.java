@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.Objects;
 
-public class ProcessManager {
+public class ProcessFactory {
 
     public static final String SH = "C:\\Program Files\\Git\\bin\\sh.exe";
     public static final SimpleStringProperty STRING_PROPERTY = new SimpleStringProperty();
     private final ProcessBuilder builder;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessFactory.class);
     private OutputStream outputStream = null;
 
     public static void setValue(String value) {
@@ -24,19 +24,19 @@ public class ProcessManager {
         }
     }
 
-    public ProcessManager(String... commands) {
+    public ProcessFactory(String... commands) {
         if (commands.length == 0) {
             throw new IllegalArgumentException("Commands are required.");
         }
         builder = new ProcessBuilder(commands);
     }
 
-    public ProcessManager withDirectory(File directory) {
+    public ProcessFactory withDirectory(File directory) {
         builder.directory(directory);
         return this;
     }
 
-    public ProcessManager withOutput(OutputStream out) {
+    public ProcessFactory withOutput(OutputStream out) {
         this.outputStream = out;
         return this;
     }
