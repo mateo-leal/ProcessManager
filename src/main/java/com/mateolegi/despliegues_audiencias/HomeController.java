@@ -1,31 +1,19 @@
 package com.mateolegi.despliegues_audiencias;
 
-import com.mateolegi.despliegues_audiencias.process.*;
-import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;
-import com.mateolegi.despliegues_audiencias.process.impl.CompressionProcess;
-import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
-import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcess;
-import com.mateolegi.despliegues_audiencias.util.Configuration;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-
 import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.STRING_PROPERTY;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.setValue;
-import static javafx.scene.control.Alert.AlertType.INFORMATION;
-import static javafx.scene.control.ButtonType.OK;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.STRING_PROPERTY;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
+import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
+import static javafx.scene.control.Alert.AlertType.ERROR;
 
 public class HomeController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
-    private static final Configuration CONFIGURATION = new Configuration();
 
     @FXML private TextField deploymentVersionField;
     @FXML private TextField audienciasVersionField;
@@ -41,19 +29,22 @@ public class HomeController {
     }
 
     @FXML
-    public void generateDeployment(ActionEvent event) {
+    public void generateDeployment() {
         setData();
-        var button = (Button) event.getSource();
-        button.setDisable(true);
-        CompletableFuture<Integer> future = CompletableFuture.allOf(
-                generateAudienciasJar(), generateFront()
-        ).thenComposeAsync(aVoid -> compressFiles());
-        if (CONFIGURATION.mustUploadGit()) {
-             future.thenComposeAsync(integer -> gitProcess());
-        }
-        future.whenComplete((o, o2) -> Platform.runLater(()
-                -> new Alert(INFORMATION, "La generación del despliegue ha fallado correctamente",
-                OK).showAndWait().ifPresent(buttonType -> limpiarVentana())));
+        disableFields(true);
+        new MainProcess()
+                .onProcessFinished(this::incrementProgressBar)
+                .onSuccess(this::limpiarVentana)
+                .onError(this::onError)
+                .run();
+    }
+
+    private void disableFields(boolean disable) {
+        generateButton.setDisable(disable);
+        deploymentVersionField.setDisable(disable);
+        deploymentNumberField.setDisable(disable);
+        audienciasVersionField.setDisable(disable);
+        backOfficeVersionField.setDisable(disable);
     }
 
     private void setData() {
@@ -69,54 +60,26 @@ public class HomeController {
         progressBar.setProgress(progressBar.getProgress() + 0.04);
     }
 
-    private CompletableFuture<Integer> generateAudienciasJar() {
-        LOGGER.debug("Se procede a la generación del Jar de Audiencias.");
-        setValue("Generando jar de Audiencias...");
-        return Objects.requireNonNull(runProcess(new AudienciasGeneration()))
-                .thenRunAsync(this::incrementProgressBar)
-                .thenApplyAsync(o -> 0);
-    }
-
-    private CompletableFuture<Integer> generateFront() {
-        LOGGER.debug("Se procede a la generación de las fuentes del front.");
-        setValue("Generando las fuentes del front...");
-        return Objects.requireNonNull(runProcess(new FrontGeneration()))
-                .thenRunAsync(this::incrementProgressBar)
-                .thenApplyAsync(o -> 0);
-    }
-
-    private CompletableFuture<Integer> compressFiles() {
-        LOGGER.debug("Se procede a comprimir los desplegables.");
-        setValue("Comprimiendo los desplegables...");
-        return runProcess(new CompressionProcess());
-    }
-
-    private CompletableFuture<Integer> gitProcess() {
-        LOGGER.debug("Se procede a subir al repositorio de despliegues.");
-        return runProcess(new GitUploadProcess());
-    }
-
-    private CompletableFuture<Integer> runProcess(AsyncProcess process) {
-        if (process.prepare()) {
-            return process.start()
-                    .thenRunAsync(this::incrementProgressBar)
-                    .thenRunAsync(process::validate)
-                    .thenApplyAsync(aVoid -> 0);
-        }
-        return null;
-    }
-
     private void incrementProgressBar() {
         progressBar.setProgress(progressBar.getProgress() + 0.16);
     }
 
     private void limpiarVentana() {
+        new Alert(CONFIRMATION, "La versión de despliegue se generó correctamente.", ButtonType.OK).show();
         deploymentVersionField.setText("");
         audienciasVersionField.setText("");
         deploymentNumberField.setText("");
         backOfficeVersionField.setText("");
         progressBar.setProgress(0);
-        generateButton.setDisable(false);
+        disableFields(false);
+        setValue("");
+    }
+
+    private void onError() {
+        new Alert(ERROR, "Ocurrió un error generando la versión de despliegue.\n" +
+                "Por favor revise el log para obtener detalles.", ButtonType.OK).show();
+        progressBar.setProgress(0);
+        disableFields(false);
         setValue("");
     }
 }
