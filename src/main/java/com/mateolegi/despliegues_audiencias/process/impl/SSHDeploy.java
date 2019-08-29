@@ -1,6 +1,7 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.jcraft.jsch.JSchException;
+import com.google.gson.Gson;
+import com.mateolegi.despliegues_audiencias.exception.RestException;
 import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.*;
 import org.apache.commons.io.IOUtils;
@@ -9,10 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.getDeploymentVersion;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.SH;
+import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.DEPLOYMENT_ERROR;
+import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.SH;
 
 public class SSHDeploy implements AsyncProcess {
 
@@ -29,12 +32,12 @@ public class SSHDeploy implements AsyncProcess {
     @Override
     public boolean prepare() {
         try (BidirectionalStream stream = new BidirectionalStream()) {
-            new ProcessManager(SH, "-c",
+            new ProcessFactory(SH, "-c",
                     "git ls-remote --heads https://git.quipux.com/despliegues/backoffice.git "
                             + DeployNumbers.getDeploymentVersion())
                     .withOutput(stream.getOutputStream())
                     .startAndWait();
-            String resp = IOUtils.toString(stream.getInputStream(), StandardCharsets.UTF_8);
+            var resp = IOUtils.toString(stream.getInputStream(), StandardCharsets.UTF_8);
             return resp.length() > 0;
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -58,14 +61,19 @@ public class SSHDeploy implements AsyncProcess {
                 ssh.runCommand("cd /opt/backoffice/versiones/ && sudo -S -p '' ./update_remote.sh -v "
                         + getDeploymentVersion() + " -u " + CONFIGURATION.getGitUser() + " -p "
                         + CONFIGURATION.getGitPassword());
-                Thread.sleep(3000);
+                Thread.sleep(5000);
+            } catch (Exception e) {
+                LOGGER.error("Ocurrió un error durante el despliegue de la versión.", e);
+                return DEPLOYMENT_ERROR;
+            }
+            try (var ssh = getSSH()) {
                 ssh.runCommand("cd /opt/backoffice/bin/ && sudo -S -p '' ./restart.sh");
                 Thread.sleep(10000);
-
-            } catch (JSchException | InterruptedException | IOException e) {
-                LOGGER.error("Ocurrió un error durante el despliegue de la versión", e);
+                return 0;
+            } catch (Exception e) {
+                LOGGER.error("Ocurrió un error durante el despliegue de la versión.", e);
+                return DEPLOYMENT_ERROR;
             }
-            return 0;
         });
     }
 
@@ -77,7 +85,17 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean validate() {
-        return false;
+        TrustAllHosts.trustAllHosts();
+        var restManager = new RestManager();
+        try {
+            String response = restManager.callGetService(CONFIGURATION.getWebVersionService());
+            VersionResponse version = new Gson().fromJson(response, VersionResponse.class);
+            return Objects.equals(version.getDespliegue(), Integer.parseInt(getDeploymentNumber()))
+                    && Objects.equals(version.getVersion(), getAudienciasVersion());
+        } catch (RestException e) {
+            LOGGER.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     private SSHConnectionManager getSSH() {

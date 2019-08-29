@@ -7,7 +7,7 @@ import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
 import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
+import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -42,15 +42,15 @@ class TestProcess {
     @AfterAll
     static void deleteGitBranch() {
         File outputDir = new File(new Configuration().getOutputDirectory());
-        int respGitPush = new ProcessManager(ProcessManager.SH, "-c", "git push origin :Test")
+        int respGitPush = new ProcessFactory(ProcessFactory.SH, "-c", "git push origin :Test")
                 .withDirectory(outputDir)
                 .startAndWait();
         assert respGitPush == 0;
-        int respGitCheckout = new ProcessManager(ProcessManager.SH, "-c", "git checkout master")
+        int respGitCheckout = new ProcessFactory(ProcessFactory.SH, "-c", "git checkout master")
                 .withDirectory(outputDir)
                 .startAndWait();
         assert respGitCheckout == 0;
-        int respGitBranch = new ProcessManager(ProcessManager.SH, "-c", "git branch -D Test")
+        int respGitBranch = new ProcessFactory(ProcessFactory.SH, "-c", "git branch -D Test")
                 .withDirectory(outputDir)
                 .startAndWait();
         assert respGitBranch == 0;

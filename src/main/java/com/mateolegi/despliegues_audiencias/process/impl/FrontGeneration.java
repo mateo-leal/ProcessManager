@@ -2,7 +2,7 @@ package com.mateolegi.despliegues_audiencias.process.impl;
 
 import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
+import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +14,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.FRONT_GENERATION;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.SH;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.setValue;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.SH;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
 public class FrontGeneration implements AsyncProcess {
 
@@ -33,7 +33,7 @@ public class FrontGeneration implements AsyncProcess {
             LOGGER.error("No existen las fuentes de front, se cancela la generación de este.");
             return false;
         }
-        LOGGER.debug("Si existe algún despliegue anterior del front generaco se elimina.");
+        LOGGER.debug("Si existe algún despliegue anterior del front generado se elimina.");
         var deployFolder = new File(frontDirectory, "deploy");
         if (deployFolder.exists()) {
             try {
@@ -65,7 +65,7 @@ public class FrontGeneration implements AsyncProcess {
         LOGGER.debug("Inicia la generación del desplegable del front");
         setValue("Generando desplegable del front...");
         return CompletableFuture.supplyAsync(()
-                -> new ProcessManager(SH, "-c", "npm run generate")
+                -> new ProcessFactory(SH, "-c", "npm run generate")
                 .withDirectory(frontDirectory).startAndWait())
                 .thenApplyAsync(this::moveDeployFolder)
                 .thenApplyAsync(this::renameDeployFolder)
@@ -131,7 +131,7 @@ public class FrontGeneration implements AsyncProcess {
         LOGGER.debug("Inicia la descompresión del zip generado por el front.");
         setValue("Descomprimiendo zip generado por el front...");
         return CompletableFuture.supplyAsync(()
-                -> new ProcessManager(SH, "-c", "unzip html/sd_front.zip -d html/backoffice/")
+                -> new ProcessFactory(SH, "-c", "unzip html/sd_front.zip -d html/backoffice/")
                 .withDirectory(outputDirectory).startAndWait());
     }
 

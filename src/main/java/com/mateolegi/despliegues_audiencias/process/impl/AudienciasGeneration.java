@@ -2,7 +2,7 @@ package com.mateolegi.despliegues_audiencias.process.impl;
 
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.util.ProcessManager;
+import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.SH;
-import static com.mateolegi.despliegues_audiencias.util.ProcessManager.setValue;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.SH;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
 /**
  * Realiza el proceso de generación de los desplegables de Audiencias.
@@ -68,7 +68,7 @@ public class AudienciasGeneration implements AsyncProcess {
         LOGGER.debug("Generando Jar de Audiencias...");
         setValue("Generando jar de Audiencias...");
         return CompletableFuture.supplyAsync(()
-                -> new ProcessManager(SH, "-c", "ant")
+                -> new ProcessFactory(SH, "-c", "ant")
                 .withDirectory(outputDirectory).startAndWait())
                 .exceptionally(this::handleError);
     }

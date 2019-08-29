@@ -1,8 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
+import com.mateolegi.despliegues_audiencias.util.TrustAllHosts;
 import org.junit.jupiter.api.Test;
 
-import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.setDeploymentVersion;
+import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -20,5 +21,14 @@ class SSHDeployTest {
         setDeploymentVersion("not-existing-branch");
         SSHDeploy sshDeploy = new SSHDeploy();
         assertThat(sshDeploy.prepare(), is(false));
+    }
+
+    @Test
+    void validate() {
+        setAudienciasVersion("3.5.0");
+        setDeploymentNumber("16");
+        SSHDeploy sshDeploy = new SSHDeploy();
+        TrustAllHosts.trustAllHosts();
+        assertThat(sshDeploy.validate(), is(true));
     }
 }
