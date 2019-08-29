@@ -17,6 +17,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        stage.setTitle("Generador de despliegues | Audiencias");
         var scene = new Scene(loadFXML(), 376, 270);
         stage.setScene(scene);
         stage.show();
