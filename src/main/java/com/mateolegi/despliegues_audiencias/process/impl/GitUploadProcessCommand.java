@@ -12,10 +12,11 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.GIT_ERROR;
+import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
-public class GitUploadProcess implements AsyncProcess {
+public class GitUploadProcessCommand implements AsyncProcess {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitUploadProcess.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitUploadProcessCommand.class);
 
     private final Configuration configuration = new Configuration();
     private final File outputDirectory = new File(configuration.getOutputDirectory());
@@ -23,7 +24,7 @@ public class GitUploadProcess implements AsyncProcess {
     @Override
     public boolean prepare() {
         LOGGER.debug("Valida que el zip se haya generado.");
-        ProcessFactory.setValue("Valida que el zip se haya generado.");
+        setValue("Valida que el zip se haya generado.");
         var zip = new File(outputDirectory, DeployNumbers.getDeploymentVersion() + ".zip");
         return zip.exists();
     }
@@ -52,7 +53,7 @@ public class GitUploadProcess implements AsyncProcess {
             return CompletableFuture.supplyAsync(() -> GIT_ERROR);
         }
         LOGGER.debug("Creamos la rama para la versión de despliegue");
-        ProcessFactory.setValue("Creando la rama...");
+        setValue("Creando la rama...");
         return getProcess("git checkout -b " + DeployNumbers.getDeploymentVersion());
     }
 
@@ -61,7 +62,7 @@ public class GitUploadProcess implements AsyncProcess {
             return CompletableFuture.supplyAsync(() -> GIT_ERROR);
         }
         LOGGER.debug("Adicionamos el zip generado");
-        ProcessFactory.setValue("Adicionando los cambios...");
+        setValue("Adicionando los cambios...");
         return getProcess("git add " + DeployNumbers.getDeploymentVersion() + ".zip");
     }
 
@@ -70,7 +71,7 @@ public class GitUploadProcess implements AsyncProcess {
             return CompletableFuture.supplyAsync(() -> GIT_ERROR);
         }
         LOGGER.debug("Damos commit a los cambios");
-        ProcessFactory.setValue("Confirmando los cambios...");
+        setValue("Confirmando los cambios...");
         var command = "git commit -m 'Backoffice " +
                 DeployNumbers.getBackofficeVersion() + ", Audiencias " +
                 DeployNumbers.getAudienciasVersion() + " despliegue " +
@@ -83,7 +84,7 @@ public class GitUploadProcess implements AsyncProcess {
             return CompletableFuture.supplyAsync(() -> GIT_ERROR);
         }
         LOGGER.debug("Subimos al repositorio");
-        ProcessFactory.setValue("Subiendo al repositorio de despliegues...");
+        setValue("Subiendo al repositorio de despliegues...");
         return getProcess("git push origin " + DeployNumbers.getDeploymentVersion());
     }
 

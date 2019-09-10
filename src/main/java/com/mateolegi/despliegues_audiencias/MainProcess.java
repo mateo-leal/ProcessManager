@@ -3,6 +3,7 @@ package com.mateolegi.despliegues_audiencias;
 import com.mateolegi.despliegues_audiencias.exception.ProcessException;
 import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.*;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ConfirmBox;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
@@ -15,27 +16,38 @@ import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
 class MainProcess implements Runnable {
 
-    private Runnable postProcess;
     private static final Logger LOGGER = LoggerFactory.getLogger(MainProcess.class);
+    private static final Configuration CONFIGURATION = new Configuration();
+    private Runnable postProcess;
     private Runnable onSuccess;
     private Runnable onError;
 
     @Override
     public void run() {
-        generateAudienciasJar().thenAcceptBothAsync(generateFront(), (jar, front) -> {
-            if (jar && front) {
-                Platform.runLater(() -> new ConfirmBox("¿Desea subir la versión al servidor de Git?")
-                        .showAndWait()
-                        .filter(ButtonType.YES::equals)
-                        .ifPresentOrElse(__ -> postGeneration(), onSuccess));
-            } else {
-                throw new ProcessException("Error generando desplegables.");
-            }
-        }).exceptionally(throwable -> {
-            LOGGER.error(throwable.getMessage(), throwable);
-            onError.run();
-            return null;
-        });
+        cloneBase().whenComplete((isGitRepositoryDownloaded, __)
+                -> generateAudienciasJar().thenAcceptBothAsync(generateFront(), (jar, front) -> {
+                    if (jar && front) {
+                        if (isGitRepositoryDownloaded) {
+                            if (CONFIGURATION.shouldUploadGit()) {
+                                postGeneration();
+                            } else {
+                                Platform.runLater(() -> new ConfirmBox("¿Desea subir la versión al servidor de Git?")
+                                        .showAndWait()
+                                        .filter(ButtonType.YES::equals)
+                                        .ifPresentOrElse(___ -> postGeneration(), onSuccess));
+                            }
+                        } else {
+                            onSuccess.run();
+                        }
+                    } else {
+                        onError.run();
+                        throw new ProcessException("Error generando desplegables.");
+                    }
+                }).exceptionally(throwable -> {
+                    LOGGER.error(throwable.getMessage(), throwable);
+                    onError.run();
+                    return null;
+                }));
     }
 
     MainProcess onSuccess(Runnable onSuccess) {
@@ -59,11 +71,17 @@ class MainProcess implements Runnable {
                 return gitProcess();
             }
             throw new ProcessException("Error comprimiendo los archivos generados");
-        }).thenRun(() -> Platform.runLater(()
-                -> new ConfirmBox("¿Desea desplegar la versión en el servidor de pruebas?")
-                .showAndWait()
-                .filter(ButtonType.YES::equals)
-                .ifPresentOrElse(__ -> postGit(), onSuccess)))
+        }).thenRun(() -> {
+            if (CONFIGURATION.shouldDeploy()) {
+                postGit();
+            } else {
+                Platform.runLater(()
+                        -> new ConfirmBox("¿Desea desplegar la versión en el servidor de pruebas?")
+                        .showAndWait()
+                        .filter(ButtonType.YES::equals)
+                        .ifPresentOrElse(__ -> postGit(), onSuccess));
+            }
+        })
         .exceptionally(throwable -> {
             LOGGER.error(throwable.getMessage(), throwable);
             onError.run();
@@ -77,6 +95,12 @@ class MainProcess implements Runnable {
             else throw new ProcessException("Error desplegando la versión");
             if (throwable != null) throw new ProcessException("Error desplegando la versión", throwable);
         });
+    }
+
+    private CompletableFuture<Boolean> cloneBase() {
+        LOGGER.debug("Se procede a descarga del repositorio base para los despliegues.");
+        setValue("Clonando repositorio de despliegues...");
+        return runProcess(new ClonningBaseProcess());
     }
 
     private CompletableFuture<Boolean> generateAudienciasJar() {
@@ -99,7 +123,7 @@ class MainProcess implements Runnable {
 
     private CompletableFuture<Boolean> gitProcess() {
         LOGGER.debug("Se procede a subir al repositorio de despliegues.");
-        return runProcess(new GitUploadProcess());
+        return runProcess(new GitUploadProcessCommand());
     }
 
     private CompletableFuture<Boolean> deploymentProcess() {

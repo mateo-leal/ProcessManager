@@ -4,7 +4,7 @@ import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.AudienciasGeneration;
 import com.mateolegi.despliegues_audiencias.process.impl.CompressionProcess;
 import com.mateolegi.despliegues_audiencias.process.impl.FrontGeneration;
-import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcess;
+import com.mateolegi.despliegues_audiencias.process.impl.GitUploadProcessCommand;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
 import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
@@ -62,7 +62,7 @@ class TestProcess {
                   new AudienciasGeneration()
                 , new FrontGeneration()
                 , new CompressionProcess()
-                , new GitUploadProcess()
+                , new GitUploadProcessCommand()
         );
         return processes.map(runnableProcess -> {
             String displayName = runnableProcess.getClass().getSimpleName();

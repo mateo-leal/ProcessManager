@@ -24,7 +24,7 @@ class RestManagerTest {
     }
 
     @Test()
-    void callGetService_when_host_does_not_exists() throws RestException {
+    void callGetService_when_host_does_not_exists() {
         var restManager = new RestManager();
         assertThrows(RestException.class, () -> restManager.callGetService("http://notexistinghost.com"));
     }

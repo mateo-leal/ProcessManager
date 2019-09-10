@@ -1,10 +1,11 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
 import org.apache.commons.io.FileUtils;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.SH;
 import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
 /**
@@ -21,12 +21,12 @@ import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 public class AudienciasGeneration implements AsyncProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AudienciasGeneration.class);
+    private static final Configuration CONFIGURATION = new Configuration();
 
     private final File outputDirectory;
 
     public AudienciasGeneration() {
-        var configuration = new Configuration();
-        outputDirectory = new File(configuration.getOutputDirectory());
+        outputDirectory = new File(CONFIGURATION.getOutputDirectory());
     }
 
     /**
@@ -65,12 +65,27 @@ public class AudienciasGeneration implements AsyncProcess {
      */
     @Override
     public CompletableFuture<Integer> start() {
+        final var dirWorkspace = new File(CONFIGURATION.getDirectoryWorkspace());
+        final var buildFile = new File("build.xml");
+        final var userProfile = new File(CONFIGURATION.getUserProfile());
         LOGGER.debug("Generando Jar de Audiencias...");
         setValue("Generando jar de Audiencias...");
-        return CompletableFuture.supplyAsync(()
-                -> new ProcessFactory(SH, "-c", "ant")
-                .withDirectory(outputDirectory).startAndWait())
-                .exceptionally(this::handleError);
+        return CompletableFuture.supplyAsync(() -> {
+            if (dirWorkspace.isDirectory() && buildFile.isFile()) {
+                Project p = new Project();
+                p.setUserProperty("dir.buildfile", outputDirectory.getAbsolutePath());
+                p.setUserProperty("ant.file", buildFile.getAbsolutePath());
+                p.setUserProperty("dir.workspace", dirWorkspace.getAbsolutePath());
+                p.setUserProperty("user.profile", userProfile.getAbsolutePath());
+                p.init();
+                ProjectHelper helper = ProjectHelper.getProjectHelper();
+                p.addReference("ant.projectHelper", helper);
+                helper.parse(p, buildFile);
+                p.executeTarget(p.getDefaultTarget());
+                return 0;
+            }
+            return ProcessCode.AUDIENCIAS_JAR_GENERATION;
+        }).exceptionally(this::handleError);
     }
 
     /**
@@ -96,7 +111,7 @@ public class AudienciasGeneration implements AsyncProcess {
      * Escribe el error en el log y retorna el código de error
      * para los errores de generación de jar de Audiencias.
      * @param error error ocurrido
-     * @return AUDIENCIAS_JAR_GENERATION(1)
+     * @return AUDIENCIAS_JAR_GENERATION(-1)
      */
     @SuppressWarnings("SameReturnValue")
     private int handleError(Throwable error) {

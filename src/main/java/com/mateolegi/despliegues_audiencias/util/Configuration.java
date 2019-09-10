@@ -34,6 +34,14 @@ public class Configuration {
         }
     }
 
+    public String getDirectoryWorkspace() {
+        return PROPERTIES.getProperty("dir.workspace");
+    }
+
+    public String getUserProfile() {
+        return System.getenv("USERPROFILE");
+    }
+
     public String getOutputDirectory() {
         return PROPERTIES.getProperty("output.directory");
     }
@@ -42,19 +50,19 @@ public class Configuration {
         return PROPERTIES.getProperty("front.path");
     }
 
-    public String getSSHUser() {
+    String getSSHUser() {
         return PROPERTIES.getProperty("ssh.user");
     }
 
-    public String getSSHPassword() {
+    String getSSHPassword() {
         return PROPERTIES.getProperty("ssh.password");
     }
 
-    public String getSSHHost() {
+    String getSSHHost() {
         return PROPERTIES.getProperty("ssh.host");
     }
 
-    public int getSSHPort() {
+    int getSSHPort() {
         return Integer.parseInt(PROPERTIES.getProperty("ssh.port"));
     }
 
@@ -66,8 +74,20 @@ public class Configuration {
         return PROPERTIES.getProperty("git.password");
     }
 
+    public String getGitRemote() {
+        return PROPERTIES.getProperty("git.remote");
+    }
+
     public String getWebVersionService() {
         return PROPERTIES.getProperty("web.version-service");
+    }
+
+    public boolean shouldUploadGit() {
+        return Boolean.parseBoolean(PROPERTIES.getProperty("always.git"));
+    }
+
+    public boolean shouldDeploy() {
+        return Boolean.parseBoolean(PROPERTIES.getProperty("always.deploy"));
     }
 
     private void loadPropertiesFile() throws IOException {

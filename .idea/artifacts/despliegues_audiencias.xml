@@ -1,0 +1,36 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="despliegues-audiencias">
+    <output-path>$PROJECT_DIR$/out/artifacts/despliegues_audiencias</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="com.mateolegi.despliegues_audiencias.App" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="msgOutputLevel" value="Debug" />
+        <option name="title" value="Despliegues Audiencias" />
+        <option name="vendor" value="Mateo Leal" />
+        <option name="version" value="1.0.0" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="despliegues_audiencias.jar">
+        <element id="module-output" name="despliegues-audiencias" />
+        <element id="library" level="project" name="Maven: org.slf4j:slf4j-log4j12:1.7.12" />
+        <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.12" />
+        <element id="library" level="project" name="Maven: org.slf4j:jcl-over-slf4j:1.7.12" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:win:12.0.1" />
+        <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.5" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:win:12.0.1" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:12.0.1" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:12.0.1" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-base:win:12.0.1" />
+        <element id="library" level="project" name="Maven: log4j:log4j:1.2.17" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-base:12.0.1" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:win:12.0.1" />
+        <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:12.0.1" />
+        <element id="library" level="project" name="Maven: commons-io:commons-io:2.6" />
+        <element id="library" level="project" name="Maven: com.jcraft:jsch:0.1.55" />
+      </element>
+    </root>
+  </artifact>
+</component>
