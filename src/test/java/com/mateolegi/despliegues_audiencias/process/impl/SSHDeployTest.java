@@ -1,6 +1,6 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.util.TrustAllHosts;
+import com.mateolegi.net.TrustAllHosts;
 import org.junit.jupiter.api.Test;
 
 import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;

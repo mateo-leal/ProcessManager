@@ -61,7 +61,7 @@ public class ProcessFactory {
     private void syncOutputs(InputStream processOutput) {
         new Thread(() -> {
             try {
-                byte[] buffer = new byte[8192];
+                var buffer = new byte[8192];
                 int len;
                 while ((len = processOutput.read(buffer)) > 0) {
                     outputStream.write(buffer, 0, len);

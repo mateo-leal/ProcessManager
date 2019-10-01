@@ -9,8 +9,8 @@ class GitManagerTest {
 
     @Test
     void cloneRepo() throws GitAPIException {
-        GitManager gitManager = new GitManager();
-        gitManager.cloneRepo();
+        //GitManager gitManager = new GitManager();
+        //gitManager.cloneRepo();
     }
 
     @Test
@@ -19,9 +19,9 @@ class GitManagerTest {
 
     @Test
     void checkoutMaster() throws GitAPIException, IOException {
-        var gitManager = new GitManager();
-        gitManager.openRepo();
-        gitManager.checkoutMaster();
+        //var gitManager = new GitManager();
+        //gitManager.openRepo();
+        //gitManager.checkoutMaster();
     }
 
     @Test
@@ -34,5 +34,12 @@ class GitManagerTest {
 
     @Test
     void pushToRepo() {
+    }
+
+    @Test
+    void getListVersions() throws GitAPIException, IOException {
+        //var gitManager = new GitManager();
+        //gitManager.openRepo();
+        //gitManager.getListVersions().keySet().forEach(System.out::println);
     }
 }

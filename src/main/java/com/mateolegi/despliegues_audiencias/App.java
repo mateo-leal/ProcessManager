@@ -1,6 +1,10 @@
 package com.mateolegi.despliegues_audiencias;
 
+import com.mateolegi.despliegues.Root;
+import com.mateolegi.despliegues.process.Event;
+import com.mateolegi.despliegues_audiencias.process.ProcessSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,7 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static com.mateolegi.despliegues_audiencias.constant.Constants.HOME_FXML;
+import static com.mateolegi.despliegues_audiencias.constant.Constants.*;
+import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.STARTUP_ERROR;
 import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
 
 public class App extends Application {
@@ -20,6 +25,14 @@ public class App extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final Options options = new Options();
     private static Stage STAGE;
+
+    private static void onSuccess(Event event) {
+        LOGGER.info("El despligue se realizó correctamente.");
+    }
+
+    private static void onError(Event event) {
+        LOGGER.error("Error desplegando la versión.");
+    }
 
     /**
      * The main entry point for all JavaFX applications.
@@ -40,9 +53,16 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         STAGE = primaryStage;
         STAGE.setTitle("Generador de despliegues | Audiencias");
-        var scene = new Scene(loadFXML(), 376, 270);
+        var scene = new Scene(loadFXML(), PREFERED_WIDTH, PREFERED_HEIGHT);
         STAGE.setScene(scene);
         STAGE.show();
+    }
+
+    @Override
+    public void stop() {
+        //Thread.getAllStackTraces().keySet().forEach(Thread::interrupt);
+        Platform.exit();
+        System.exit(0);
     }
 
     @Contract(pure = true)
@@ -65,7 +85,7 @@ public class App extends Application {
         return new DefaultParser().parse(options, args);
     }
 
-    private static void setDeployNumbers(CommandLine cmd) throws MissingOptionException {
+    private static void requireDeployNumbers(CommandLine cmd) throws MissingOptionException {
         if (!cmd.hasOption("dv")) {
             throw new MissingOptionException("La opción --deploymentVersion es obligatoria para el CLI");
         }
@@ -81,26 +101,33 @@ public class App extends Application {
         setBackofficeVersion(cmd.getOptionValue("bv", "no aplica"));
     }
 
-    public static void main(String[] args) throws ParseException {
-        CommandLine cmd = setOptions(args);
-        if (cmd.hasOption("h")) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("Despliegues Audiencias", options);
-            System.exit(0);
-        }
-        if (cmd.hasOption("g")) {
-            launch();
-        } else {
-            if (cmd.getOptions().length == 0) {
+    public static void main(String[] args) {
+        try {
+            var cmd = setOptions(args);
+            if (cmd.hasOption("h")) {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("Despliegues Audiencias", options);
                 System.exit(0);
             }
-            setDeployNumbers(cmd);
-            new MainProcess().onProcessFinished(() -> {})
-                    .onSuccess(() -> LOGGER.info("El despligue se realizó correctamente."))
-                    .onError(() -> LOGGER.error("Error desplegando la versión."))
-                    .run();
+            if (cmd.hasOption("g")) {
+                launch();
+            } else {
+                if (cmd.getOptions().length == 0) {
+                    var formatter = new HelpFormatter();
+                    formatter.printHelp("Despliegues Audiencias", options);
+                    System.exit(0);
+                }
+                requireDeployNumbers(cmd);
+                Root.get()
+                        .on(Root.PROCESS_FINISHED, event -> {})
+                        .on(Root.SUCCESS, App::onSuccess)
+                        .on(Root.ERROR, App::onError)
+                        .withManager(ProcessSet.getManager())
+                        .run();
+            }
+        } catch (ParseException e) {
+            LOGGER.error(e.getMessage(), e);
+            System.exit(STARTUP_ERROR);
         }
     }
 

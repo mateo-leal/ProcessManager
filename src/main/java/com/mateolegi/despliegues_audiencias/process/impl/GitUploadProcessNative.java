@@ -1,9 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
+import com.mateolegi.despliegues.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
-import com.mateolegi.despliegues_audiencias.util.GitManager;
+import com.mateolegi.git.GitManager;
 import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -21,7 +21,8 @@ public class GitUploadProcessNative implements AsyncProcess {
 
     private static final Configuration CONFIGURATION = new Configuration();
     private final File outputDirectory = new File(CONFIGURATION.getOutputDirectory());
-    private final GitManager gitManager = new GitManager();
+    private final GitManager gitManager = new GitManager(new File(CONFIGURATION.getOutputDirectory()),
+            CONFIGURATION.getGitUser(), CONFIGURATION.getGitPassword());
 
     @Override
     public boolean prepare() {

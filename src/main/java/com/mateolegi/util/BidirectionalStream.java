@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.util;
 
 import java.io.Closeable;
 import java.io.IOException;

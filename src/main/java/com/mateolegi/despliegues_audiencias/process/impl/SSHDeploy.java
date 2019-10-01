@@ -1,8 +1,15 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.google.gson.Gson;
-import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
-import com.mateolegi.despliegues_audiencias.util.*;
+import com.mateolegi.despliegues.Root;
+import com.mateolegi.despliegues.process.AsyncProcess;
+import com.mateolegi.despliegues_audiencias.constant.Constants;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
+import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
+import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
+import com.mateolegi.despliegues_audiencias.util.VersionResponse;
+import com.mateolegi.net.Rest;
+import com.mateolegi.sshconnection.SSHConnectionManager;
+import com.mateolegi.util.BidirectionalStream;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -35,6 +42,9 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean prepare() {
+        if (!Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
+            return false;
+        }
         try (BidirectionalStream stream = new BidirectionalStream()) {
             setValue("Validando que la rama se haya subido...");
             new ProcessFactory(SH, "-c",
@@ -61,6 +71,8 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public CompletableFuture<Integer> start() {
+        LOGGER.debug("Desplegando en ambiente de pruebas.");
+        setValue("Desplegando en ambiente de pruebas...");
         return CompletableFuture.supplyAsync(() -> {
             try (var ssh = getSSH()) {
                 setValue("Desplegando versión en el servidor de pruebas...");
@@ -112,12 +124,10 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean validate() {
-        TrustAllHosts.trustAllHosts();
-        var restManager = new RestManager();
+        var rest = new Rest();
         try {
             setValue("Validando que la versión está desplegada...");
-            String response = restManager.callGetService(CONFIGURATION.getWebVersionService());
-            VersionResponse version = new Gson().fromJson(response, VersionResponse.class);
+            var version = rest.get(CONFIGURATION.getWebVersionService()).getBody(VersionResponse.class);
             return Objects.equals(version.getDespliegue(), Integer.parseInt(getDeploymentNumber()))
                     && Objects.equals(version.getVersion(), getAudienciasVersion());
         } catch (Exception e) {
@@ -133,16 +143,15 @@ public class SSHDeploy implements AsyncProcess {
                 Executors.newSingleThreadExecutor()
                         .submit(() -> ssh.runCommand("cd /opt/backoffice/bin/ && sudo -S -p '' ./start.sh"))
                         .get(1, TimeUnit.MINUTES);
-            } catch (Exception e) {
-                LOGGER.error("No se pudo iniciar el servidor.", e);
-            }
+            } catch (Exception ignored) { }
         }
         return validate();
     }
 
     @NotNull
     private SSHConnectionManager getSSH() {
-        var ssh = new SSHConnectionManager();
+        var ssh = new SSHConnectionManager(CONFIGURATION.getSSHUser(), CONFIGURATION.getSSHPassword(),
+                CONFIGURATION.getSSHHost(), CONFIGURATION.getSSHPort());
         ssh.open();
         return ssh;
     }

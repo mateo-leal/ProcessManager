@@ -50,19 +50,19 @@ public class Configuration {
         return PROPERTIES.getProperty("front.path");
     }
 
-    String getSSHUser() {
+    public String getSSHUser() {
         return PROPERTIES.getProperty("ssh.user");
     }
 
-    String getSSHPassword() {
+    public String getSSHPassword() {
         return PROPERTIES.getProperty("ssh.password");
     }
 
-    String getSSHHost() {
+    public String getSSHHost() {
         return PROPERTIES.getProperty("ssh.host");
     }
 
-    int getSSHPort() {
+    public int getSSHPort() {
         return Integer.parseInt(PROPERTIES.getProperty("ssh.port"));
     }
 

@@ -1,7 +1,13 @@
 package com.mateolegi.despliegues_audiencias;
 
-import com.mateolegi.despliegues_audiencias.util.GitManager;
+import com.mateolegi.despliegues.Root;
+import com.mateolegi.despliegues.process.Event;
+import com.mateolegi.despliegues_audiencias.constant.Constants;
+import com.mateolegi.despliegues_audiencias.process.ProcessSet;
+import com.mateolegi.despliegues_audiencias.util.Configuration;
+import com.mateolegi.despliegues_audiencias.util.ConfirmBox;
 import com.mateolegi.despliegues_audiencias.util.VersionGetter;
+import com.mateolegi.git.GitManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -9,7 +15,11 @@ import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static com.mateolegi.despliegues_audiencias.App.getStage;
+import static com.mateolegi.despliegues_audiencias.constant.Constants.NUMBER_OF_PROCESS;
 import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
 import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.STRING_PROPERTY;
 import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
@@ -19,6 +29,7 @@ import static javafx.scene.control.Alert.AlertType.ERROR;
 public class HomeController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
+    private static final Configuration CONFIGURATION = new Configuration();
 
     @FXML private TextField deploymentVersionField;
     @FXML private TextField audienciasVersionField;
@@ -35,7 +46,8 @@ public class HomeController {
         generateButton.setDisable(true);
         new Thread(() -> {
             Platform.runLater(() -> getStage().getScene().setCursor(Cursor.WAIT));
-            var nextVersion = new GitManager().nextVersion();
+            var nextVersion = new GitManager(new File(CONFIGURATION.getOutputDirectory()), CONFIGURATION.getGitUser(),
+                    CONFIGURATION.getGitPassword()).nextVersion(CONFIGURATION.getGitRemote());
             Platform.runLater(() -> {
                 deploymentVersionField.setText(nextVersion);
                 deploymentVersionField.setDisable(false);
@@ -55,10 +67,13 @@ public class HomeController {
         setData();
         disableFields(true);
         Platform.runLater(() -> getStage().getScene().setCursor(Cursor.WAIT));
-        new MainProcess()
-                .onProcessFinished(this::incrementProgressBar)
-                .onSuccess(this::limpiarVentana)
-                .onError(this::onError)
+        Root.get()
+                .on(Root.PROCESS_FINISHED, this::incrementProgressBar)
+                .on(Root.SUCCESS, this::limpiarVentana)
+                .on(Root.ERROR, this::onError)
+                .on(Constants.Event.GIT_CONFIRM, this::onGitConfirmation)
+                .on(Constants.Event.DEPLOY_CONFIRM, this::onDeployConfirmation)
+                .withManager(ProcessSet.getManager())
                 .run();
     }
 
@@ -80,14 +95,13 @@ public class HomeController {
         LOGGER.debug("Deployment number: " + getDeploymentNumber());
         setBackofficeVersion(backOfficeVersionField.getText().trim());
         LOGGER.debug("Backoffice version: " + getBackofficeVersion());
-        progressBar.setProgress(progressBar.getProgress() + 0.04);
     }
 
-    private void incrementProgressBar() {
-        Platform.runLater(() -> progressBar.setProgress(progressBar.getProgress() + 0.16));
+    private void incrementProgressBar(Event e) {
+        Platform.runLater(() -> progressBar.setProgress(progressBar.getProgress() + (1d / NUMBER_OF_PROCESS)));
     }
 
-    private void limpiarVentana() {
+    private void limpiarVentana(Event e) {
         Platform.runLater(() -> {
             new Alert(CONFIRMATION, "La versión de despliegue se generó correctamente.", ButtonType.OK).show();
             deploymentVersionField.setText("");
@@ -101,14 +115,36 @@ public class HomeController {
         });
     }
 
-    private void onError() {
+    private void onError(Event e) {
         Platform.runLater(() -> {
             new Alert(ERROR, "Ocurrió un error generando la versión de despliegue.\n" +
                     "Por favor revise el log para obtener detalles.", ButtonType.OK).show();
             progressBar.setProgress(0);
             disableFields(false);
             setValue("");
-            Platform.runLater(() -> getStage().getScene().setCursor(Cursor.DEFAULT));
+            getStage().getScene().setCursor(Cursor.DEFAULT);
         });
+    }
+
+    private boolean onGitConfirmation(Event e) {
+        if (CONFIGURATION.shouldUploadGit()) {
+            return true;
+        }
+        var response = new AtomicBoolean();
+        Platform.runLater(() -> response.set(new ConfirmBox("¿Desea subir la versión al servidor de Git?")
+                .showAndWait()
+                .filter(ButtonType.YES::equals).isPresent()));
+        return response.get();
+    }
+
+    private boolean onDeployConfirmation(Event e) {
+        if (CONFIGURATION.shouldDeploy()) {
+            return true;
+        }
+        var response = new AtomicBoolean();
+        Platform.runLater(() -> response.set(new ConfirmBox("¿Desea desplegar la versión en el servidor de pruebas?")
+                .showAndWait()
+                .filter(ButtonType.YES::equals).isPresent()));
+        return response.get();
     }
 }

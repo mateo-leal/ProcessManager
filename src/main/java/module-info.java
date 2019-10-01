@@ -3,6 +3,7 @@ module com.mateolegi {
     requires javafx.fxml;
     requires slf4j.api;
     requires org.apache.commons.io;
+    requires org.apache.commons.collections4;
     requires jsch;
     requires gson;
     requires ant;

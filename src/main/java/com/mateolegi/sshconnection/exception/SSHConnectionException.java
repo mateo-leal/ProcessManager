@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.exception;
+package com.mateolegi.sshconnection.exception;
 
 public class SSHConnectionException extends SSHException {
     /**

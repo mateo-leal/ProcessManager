@@ -1,11 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
+import com.mateolegi.despliegues.process.AsyncProcess;
+import com.mateolegi.despliegues_audiencias.util.AntManager;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import org.apache.commons.io.FileUtils;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.ProjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,27 +63,12 @@ public class AudienciasGeneration implements AsyncProcess {
      */
     @Override
     public CompletableFuture<Integer> start() {
-        final var dirWorkspace = new File(CONFIGURATION.getDirectoryWorkspace());
-        final var buildFile = new File("build.xml");
-        final var userProfile = new File(CONFIGURATION.getUserProfile());
-        LOGGER.debug("Generando Jar de Audiencias...");
+        LOGGER.debug("Se procede a la generación del Jar de Audiencias.");
         setValue("Generando jar de Audiencias...");
         return CompletableFuture.supplyAsync(() -> {
-            if (dirWorkspace.isDirectory() && buildFile.isFile()) {
-                Project p = new Project();
-                p.setUserProperty("dir.buildfile", outputDirectory.getAbsolutePath());
-                p.setUserProperty("ant.file", buildFile.getAbsolutePath());
-                p.setUserProperty("dir.workspace", dirWorkspace.getAbsolutePath());
-                p.setUserProperty("user.profile", userProfile.getAbsolutePath());
-                p.init();
-                ProjectHelper helper = ProjectHelper.getProjectHelper();
-                p.addReference("ant.projectHelper", helper);
-                helper.parse(p, buildFile);
-                p.executeTarget(p.getDefaultTarget());
-                return 0;
-            }
-            return ProcessCode.AUDIENCIAS_JAR_GENERATION;
-        }).exceptionally(this::handleError);
+            new AntManager().build();
+            return 0;
+        });
     }
 
     /**
@@ -105,17 +88,5 @@ public class AudienciasGeneration implements AsyncProcess {
             return audienciasJar.exists() && audienciasLib.exists();
         }
         return false;
-    }
-
-    /**
-     * Escribe el error en el log y retorna el código de error
-     * para los errores de generación de jar de Audiencias.
-     * @param error error ocurrido
-     * @return AUDIENCIAS_JAR_GENERATION(-1)
-     */
-    @SuppressWarnings("SameReturnValue")
-    private int handleError(Throwable error) {
-        LOGGER.error("Ocurrió un error durante la generación del jar de Audiencias", error);
-        return ProcessCode.AUDIENCIAS_JAR_GENERATION;
     }
 }

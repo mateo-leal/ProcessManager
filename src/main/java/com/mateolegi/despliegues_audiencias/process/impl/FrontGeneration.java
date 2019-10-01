@@ -1,6 +1,6 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
+import com.mateolegi.despliegues.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
 import org.apache.commons.io.FileUtils;
@@ -62,8 +62,8 @@ public class FrontGeneration implements AsyncProcess {
 
     @Override
     public CompletableFuture<Integer> start() {
-        LOGGER.debug("Inicia la generación del desplegable del front");
-        setValue("Generando desplegable del front...");
+        LOGGER.debug("Se procede a la generación de las fuentes del front.");
+        setValue("Generando las fuentes del front...");
         return CompletableFuture.supplyAsync(()
                 -> new ProcessFactory(SH, "-c", "npm run generate")
                 .withDirectory(frontDirectory).startAndWait())

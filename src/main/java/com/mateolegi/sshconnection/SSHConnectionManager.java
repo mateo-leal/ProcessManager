@@ -1,8 +1,9 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.sshconnection;
 
 import com.jcraft.jsch.*;
-import com.mateolegi.despliegues_audiencias.exception.SSHConnectionException;
-import com.mateolegi.despliegues_audiencias.exception.SSHNotInitializedException;
+import com.mateolegi.sshconnection.exception.SSHConnectionException;
+import com.mateolegi.sshconnection.exception.SSHNotInitializedException;
+import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,16 +17,22 @@ import java.util.Properties;
  */
 public class SSHConnectionManager implements AutoCloseable {
 
-    /** Archivo de configuración */
-    private static final Configuration CONFIGURATION = new Configuration();
     private static final Logger LOGGER = LoggerFactory.getLogger(SSHConnectionManager.class);
 
     private Session session;
 
-    private final String username = CONFIGURATION.getSSHUser();
-    private final String password = CONFIGURATION.getSSHPassword();
-    private final String hostname = CONFIGURATION.getSSHHost();
-    private final int port = CONFIGURATION.getSSHPort();
+    private final String username;
+    private final String password;
+    private final String hostname;
+    private final int port;
+
+    @Contract(pure = true)
+    public SSHConnectionManager(String username, String password, String hostname, int port) {
+        this.username = username;
+        this.password = password;
+        this.hostname = hostname;
+        this.port = port;
+    }
 
     public void open() {
         try {

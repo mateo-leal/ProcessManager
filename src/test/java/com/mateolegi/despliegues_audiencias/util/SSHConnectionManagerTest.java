@@ -1,7 +1,8 @@
 package com.mateolegi.despliegues_audiencias.util;
 
 import com.jcraft.jsch.JSchException;
-import com.mateolegi.despliegues_audiencias.exception.SSHException;
+import com.mateolegi.sshconnection.exception.SSHException;
+import com.mateolegi.sshconnection.SSHConnectionManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,9 +14,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class SSHConnectionManagerTest {
 
+    private static final Configuration CONFIGURATION = new Configuration();
+
     @Test
     void open() {
-        try (var ssh = new SSHConnectionManager()) {
+        try (var ssh = new SSHConnectionManager(CONFIGURATION.getSSHUser(), CONFIGURATION.getSSHPassword(),
+                CONFIGURATION.getSSHHost(), CONFIGURATION.getSSHPort())) {
             ssh.open();
         } catch (SSHException e) {
             fail(e);
@@ -24,7 +28,8 @@ class SSHConnectionManagerTest {
 
     @Test
     void runCommand() {
-        try (var ssh = new SSHConnectionManager()) {
+        try (var ssh = new SSHConnectionManager(CONFIGURATION.getSSHUser(), CONFIGURATION.getSSHPassword(),
+                CONFIGURATION.getSSHHost(), CONFIGURATION.getSSHPort())) {
             ssh.open();
             var resp = ssh.runCommand("uname -a");
             assertNotNull(resp);

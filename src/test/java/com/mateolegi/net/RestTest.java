@@ -1,20 +1,31 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.net;
 
-import com.mateolegi.net.RestException;
-import com.mateolegi.git.TrustAllHosts;
-import com.mateolegi.net.Rest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class RestManagerTest {
+class RestTest {
 
-    @BeforeEach
-    void setUp() {
-        TrustAllHosts.trustAllHosts();
+    @Test
+    void test() {
+        var client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2).build();
+        var request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create("https://git.quipux.com/api/v4/projects/168/repository/branches"))
+                .header("Private-Token", "zsvNypp4yB4xdTJwNFpc")
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::headers)
+                .thenAccept(System.out::println)
+                .join();
     }
 
     @Test
@@ -22,6 +33,7 @@ class RestManagerTest {
         var restManager = new Rest();
         var response = restManager.get("https://www.google.com/");
         assertThat(response, is(notNullValue()));
+        System.out.println(response.getBody());
         assertThat(response.getContentLength(), is(greaterThan(0L)));
     }
 

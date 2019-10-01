@@ -1,9 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
-import com.mateolegi.despliegues_audiencias.process.AsyncProcess;
+import com.mateolegi.despliegues.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
-import com.mateolegi.despliegues_audiencias.util.GitManager;
+import com.mateolegi.git.GitManager;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +16,12 @@ import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
 public class ClonningBaseProcess implements AsyncProcess {
 
-    private final Configuration CONFIGURATION = new Configuration();
-    private final File outputDirectory = new File(CONFIGURATION.getOutputDirectory());
-    private final GitManager gitManager = new GitManager();
+    private static final Configuration CONFIGURATION = new Configuration();
     private static final Logger LOGGER = LoggerFactory.getLogger(ClonningBaseProcess.class);
+
+    private final File outputDirectory = new File(CONFIGURATION.getOutputDirectory());
+    private final GitManager gitManager = new GitManager(new File(CONFIGURATION.getOutputDirectory()),
+            CONFIGURATION.getGitUser(), CONFIGURATION.getGitPassword());
 
     /**
      * Prepara los archivos y realiza las respectivas validaciones
@@ -35,8 +37,7 @@ public class ClonningBaseProcess implements AsyncProcess {
         if (gitFolder.exists()) {
             return true;
         }
-        outputDirectory.delete();
-        return outputDirectory.getParentFile().mkdirs();
+        return outputDirectory.delete() && outputDirectory.getParentFile().mkdirs();
     }
 
     /**
@@ -50,12 +51,13 @@ public class ClonningBaseProcess implements AsyncProcess {
      */
     @Override
     public CompletableFuture<Integer> start() {
+        LOGGER.debug("Se procede a descarga del repositorio base para los despliegues.");
         return CompletableFuture.supplyAsync(() -> {
             var gitFolder = new File(outputDirectory, ".git");
             if (!gitFolder.exists()) {
                 setValue("Clonando repositorio de despliegues...");
                 try {
-                    gitManager.cloneRepo();
+                    gitManager.cloneRepo(CONFIGURATION.getGitRemote());
                 } catch (GitAPIException e) {
                     LOGGER.error(e.getMessage(), e);
                     return GIT_ERROR;
