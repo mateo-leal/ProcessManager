@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.util;
 
 import com.mateolegi.despliegues_audiencias.exception.RestException;
 import org.apache.commons.io.IOUtils;

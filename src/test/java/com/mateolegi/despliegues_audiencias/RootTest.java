@@ -6,7 +6,7 @@ class MainProcessTest {
 
     @Test
     void test() {
-        new MainProcess()
+        MainProcess.getInstance()
                 .onProcessFinished(() -> {})
                 .onSuccess(() -> {})
                 .onError(() -> {})

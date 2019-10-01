@@ -1,17 +1,21 @@
 package com.mateolegi.despliegues_audiencias.exception;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+
 public class RestException extends Exception {
 
-    /**
-     * Constructs a new exception with the specified detail message.  The
-     * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     *
-     * @param message the detail message. The detail message is saved for
-     *                later retrieval by the {@link #getMessage()} method.
-     */
-    public RestException(String message, int code) {
-        super("Error code "+ code + ", with message: " + message);
+    private String message;
+    private int code;
+    private HttpURLConnection response;
+
+    public RestException(HttpURLConnection response) {
+        super();
+        this.response = response;
+        try {
+            this.message = response.getResponseMessage();
+            this.code = response.getResponseCode();
+        } catch (IOException ignored) { }
     }
 
     /**
@@ -30,5 +34,16 @@ public class RestException extends Exception {
      */
     public RestException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+    public int getCode() {
+        return code;
+    }
+    public HttpURLConnection getResponse() {
+        return response;
     }
 }

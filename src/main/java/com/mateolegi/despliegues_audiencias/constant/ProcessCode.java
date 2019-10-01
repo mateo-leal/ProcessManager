@@ -23,4 +23,6 @@ public class ProcessCode {
 
     /** Error ocurrido durante el despliegue de la versión en el ambiente */
     public static final int DEPLOYMENT_ERROR = -6;
+
+    public static final int STARTUP_ERROR = -7;
 }
