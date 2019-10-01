@@ -1,25 +1,34 @@
-package com.mateolegi.util;
+package com.mateolegi.net;
 
-import com.mateolegi.despliegues_audiencias.exception.RestException;
-import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
-public class RestManager {
+public class Rest {
 
-    public String callGetService(String endpoint) throws RestException {
+    public Rest() {
+        TrustAllHosts.trustAllHosts();
+    }
+
+    public Response get(String endpoint) throws RestException {
+        return executeGetRequest(endpoint);
+    }
+
+    @NotNull
+    @Contract("_ -> new")
+    private Response executeGetRequest(String endpoint) throws RestException {
         try {
             var url = new URL(endpoint);
             var conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
             if (conn.getResponseCode() != 200) {
-                throw new RestException(conn.getResponseMessage(), conn.getResponseCode());
+                throw new RestException(conn);
             }
-            var response = IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
+            var response = new Response(conn);
             conn.disconnect();
             return response;
         } catch (IOException e) {

@@ -1,4 +1,4 @@
-package com.mateolegi.git;
+package com.mateolegi.net;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

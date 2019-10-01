@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.exception;
+package com.mateolegi.net;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -45,5 +45,11 @@ public class RestException extends Exception {
     }
     public HttpURLConnection getResponse() {
         return response;
+    }
+
+    @Override
+    public String toString() {
+        String s = getClass().getName();
+        return (message != null) ? (s + ": " + code + " - " + message) : s;
     }
 }
