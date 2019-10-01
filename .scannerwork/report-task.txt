@@ -1,0 +1,6 @@
+projectKey=GEN_DESP_AUDIENCIAS_WEB
+serverUrl=http://qxinfra:8081
+serverVersion=7.6.0.21501
+dashboardUrl=http://qxinfra:8081/dashboard?id=GEN_DESP_AUDIENCIAS_WEB
+ceTaskId=AW0lp-C9Cfcj2zvcmuS0
+ceTaskUrl=http://qxinfra:8081/api/ce/task?id=AW0lp-C9Cfcj2zvcmuS0
