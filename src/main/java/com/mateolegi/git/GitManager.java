@@ -1,4 +1,4 @@
-package com.mateolegi.despliegues_audiencias.util;
+package com.mateolegi.git;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -31,17 +31,14 @@ import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
 import static javafx.scene.control.Alert.AlertType.WARNING;
 
 public class GitManager {
-    private static final Configuration CONFIGURATION = new Configuration();
-    private final File localPath = new File(CONFIGURATION.getOutputDirectory());
-    private final String remotePath = CONFIGURATION.getGitRemote();
+    private final File localPath;
     private Git git = null;
     private final CredentialsProvider cp;
     private final ProgressMonitor monitor = new TextProgressMonitor(new PrintWriter(System.out));
 
-    public GitManager() {
-        var name = CONFIGURATION.getGitUser();
-        var password = CONFIGURATION.getGitPassword();
-        cp = new UsernamePasswordCredentialsProvider(name, password);
+    public GitManager(File localPath, String user, String password) {
+        this.localPath = localPath;
+        cp = new UsernamePasswordCredentialsProvider(user, password);
     }
 
     public void openRepo() throws IOException {
@@ -54,7 +51,7 @@ public class GitManager {
         this.git = new Git(repository);
     }
 
-    public void cloneRepo() throws GitAPIException {
+    public void cloneRepo(String remotePath) throws GitAPIException {
         this.git = Git.cloneRepository()
                 .setProgressMonitor(monitor)
                 .setURI(remotePath)
@@ -108,9 +105,9 @@ public class GitManager {
                 .call();
     }
 
-    public String nextVersion() {
+    public String nextVersion(String remotePath) {
         try {
-            var actualVersion = getActualVersion();
+            var actualVersion = getActualVersion(remotePath);
             var splitedVersion = Stream.of(actualVersion.split("\\."))
                     .map(Integer::parseInt).collect(Collectors.toUnmodifiableList());
             return Stream.of(splitedVersion.get(0), splitedVersion.get(1), splitedVersion.get(2) + 1)
@@ -123,9 +120,9 @@ public class GitManager {
         }
     }
 
-    public Map<String, Ref> getListVersions() throws GitAPIException, IOException {
+    public Map<String, Ref> getListVersions(String remotePath) throws GitAPIException {
         try (RevWalk walk = new RevWalk(git.getRepository())) {
-            return getVersionList().entrySet().stream()
+            return getVersionList(remotePath).entrySet().stream()
                     .map(entry -> {
                         try {
                             RevCommit commit = walk.parseCommit(entry.getValue().getObjectId());
@@ -138,10 +135,10 @@ public class GitManager {
         }
     }
 
-    private Map<String, Ref> getVersionList() throws GitAPIException {
+    private Map<String, Ref> getVersionList(String remotePath) throws GitAPIException {
         var p = Pattern.compile("\\d+\\.\\d+\\.\\d+",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        return listRemoteBranches().entrySet().stream()
+        return listRemoteBranches(remotePath).entrySet().stream()
                 .peek(entry -> System.out.println(entry.getKey()))
                 .map(entry -> {
                     String branch = entry.getKey().split("refs/heads/")[1];
@@ -150,7 +147,7 @@ public class GitManager {
                 .collect(Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue));
     }
 
-    private Map<String, Ref> listRemoteBranches() throws GitAPIException {
+    private Map<String, Ref> listRemoteBranches(String remotePath) throws GitAPIException {
         return Git.lsRemoteRepository()
                 .setCredentialsProvider(cp)
                 .setHeads(true)
@@ -159,8 +156,8 @@ public class GitManager {
                 .callAsMap();
     }
 
-    private String getActualVersion() throws GitAPIException {
-        return getVersionList().entrySet().stream()
+    private String getActualVersion(String remotePath) throws GitAPIException {
+        return getVersionList(remotePath).entrySet().stream()
                 .map(Pair::toPair)
                 .max(Pair::compareTo)
                 .map(Pair::getKey)
