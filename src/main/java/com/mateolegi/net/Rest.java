@@ -1,38 +1,28 @@
 package com.mateolegi.net;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
 
 public class Rest {
 
-    public Rest() {
-        TrustAllHosts.trustAllHosts();
+    public CompletableFuture<HttpResponse<String>> get(String endpoint) {
+        return getClient().sendAsync(getRequest(endpoint), HttpResponse.BodyHandlers.ofString());
     }
 
-    public Response get(String endpoint) throws RestException {
-        return executeGetRequest(endpoint);
+    private HttpClient getClient() {
+        return HttpClient.newBuilder()
+                .sslContext(TrustAllHosts.trustAllHosts())
+                .version(HttpClient.Version.HTTP_2)
+                .build();
     }
 
-    @NotNull
-    @Contract("_ -> new")
-    private Response executeGetRequest(String endpoint) throws RestException {
-        try {
-            var url = new URL(endpoint);
-            var conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
-            if (conn.getResponseCode() != 200) {
-                throw new RestException(conn);
-            }
-            var response = new Response(conn);
-            conn.disconnect();
-            return response;
-        } catch (IOException e) {
-            throw new RestException(e.getMessage(), e);
-        }
+    private HttpRequest getRequest(String endpoint) {
+        return HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(endpoint))
+                .build();
     }
 }

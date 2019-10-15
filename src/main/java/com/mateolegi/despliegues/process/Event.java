@@ -6,6 +6,9 @@ import java.util.Optional;
 
 public class Event {
 
+    public static final String CODE = "code";
+    public static final String SOURCE = "source";
+
     private Map<String, Object> args = new HashMap<>();
 
     public Event() { }

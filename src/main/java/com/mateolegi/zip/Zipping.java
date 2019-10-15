@@ -3,6 +3,7 @@ package com.mateolegi.zip;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
@@ -13,44 +14,35 @@ import java.util.zip.ZipOutputStream;
 
 public class Zipping {
 
+    private Writer writer;
+
+    Zipping(OutputStream stream) {
+        writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
+    }
+
     /**
      * This method is the entry point for creating a zip file.
-     *
-     * @param destinationDir: absolute path of the distinaition folder.
-     * @param zipName:        destination file name to be zipped e.g. myZipfile.zip
-     * @param sourceDirs:     multiple source directories to be zipped.
-     * @throws IOException
+     * @param zipFile    file to be zipped e.g. myZipfile.zip
+     * @param sourceDirs multiple source directories to be zipped.
+     * @throws IOException if i/o error occurs
      */
-    public void ZipDirs(String destinationDir, String zipName, List<String> sourceDirs)
+    public void zip(@NotNull File zipFile, List<File> sourceDirs)
             throws IOException {
-        File destinationDirFile = new File(destinationDir);
-        File zipFile = new File(destinationDir + File.separatorChar + zipName);
-        if (!destinationDirFile.exists()) {
-            if (!destinationDirFile.mkdirs()) {
-                throw new RuntimeException("cannot create directories ");
-            }
-        } else {
-            boolean exists = zipFile.exists();
-            if (exists && !zipFile.delete()) {
-                throw new RuntimeException("cannot delete existing zip file: " +
-                        zipFile.getAbsolutePath());
-            } else if (exists) {
-                System.out.println("Zip file already exists: " +
-                        zipFile.getAbsolutePath());
-                return;
-            }
+        var exists = zipFile.exists();
+        if (exists && !zipFile.delete()) {
+            throw new IOException("cannot delete existing zip file: " + zipFile.getAbsolutePath());
+        } else if (exists) {
+            throw new IOException("Zip file already exists: " + zipFile.getAbsolutePath());
         }
         createZip(zipFile, sourceDirs);
     }
 
-    private void createZip(File destination, List<String> sourceDirs) throws IOException {
+    private void createZip(File destination, @NotNull List<File> sourceDirs) throws IOException {
         try (var out = new ZipOutputStream(new FileOutputStream(destination))) {
-            for (String sourceDir : sourceDirs) {
-                File sourceDirFile = new File(sourceDir);
-                if (!sourceDirFile.exists()) {
-                    throw new FileNotFoundException(sourceDir);
+            for (var sourceDirFile : sourceDirs) {
+                if (sourceDirFile.exists()) {
+                    addDirectory(sourceDirFile.getName(), sourceDirFile.getAbsolutePath(), sourceDirFile, out);
                 }
-                addDirectory(sourceDirFile.getName(), sourceDirFile.getAbsolutePath(), sourceDirFile, out);
             }
         }
     }
@@ -62,6 +54,9 @@ public class Zipping {
 
     private void addFile(String baseDirName, String baseDir, File file, @NotNull final ZipOutputStream out) {
         try (var in = new BufferedInputStream(new FileInputStream(file))) {
+            if (writer != null ) {
+                writer.write("Adding file " + file.getAbsolutePath() + " to zip.\n");
+            }
             var zipEntry = new ZipEntry(baseDirName + File.separatorChar + fileToRelativePath(file, baseDir));
             var attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
             zipEntry.setLastModifiedTime(attr.lastModifiedTime());

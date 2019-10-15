@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 class ZipUtilTest {
 
@@ -28,7 +27,7 @@ class ZipUtilTest {
     }
 
     @Test
-    void zipDirs() throws IOException {
+    void zipDirs() {
         var audiencias = new File(CONFIGURATION.getOutputDirectory(), "audiencias");
         var html = new File(CONFIGURATION.getOutputDirectory(), "html");
 //        var stream = ZipFile.zip(Arrays.asList(audiencias, html),

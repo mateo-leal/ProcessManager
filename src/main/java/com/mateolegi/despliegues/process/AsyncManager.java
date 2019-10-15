@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -58,7 +59,8 @@ public class AsyncManager implements Runnable {
     private CompletableFuture<Boolean> runProcess(@NotNull AsyncProcess process) {
         if (process.prepare()) {
             return process.start()
-                    .thenAccept(__ -> Root.get().emit(Root.PROCESS_FINISHED))
+                    .thenAccept(code -> Root.get().emit(Root.PROCESS_FINISHED,
+                            Map.of(Event.SOURCE, AsyncManager.class, Event.CODE, code)))
                     .thenApply(__ -> process.validate());
         }
         return CompletableFuture.completedFuture(false);
@@ -89,7 +91,7 @@ public class AsyncManager implements Runnable {
                 runProcess(a).whenComplete(this::next);
             }
         } else {
-            Root.get().emit(prev ? Root.SUCCESS : Root.ERROR);
+            Root.get().emit(prev ? Root.SUCCESS : Root.ERROR, Map.of(Event.SOURCE, AsyncManager.class));
             isClosed = true;
         }
     }

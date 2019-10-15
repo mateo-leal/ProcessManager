@@ -82,6 +82,10 @@ public class Configuration {
         return PROPERTIES.getProperty("web.version-service");
     }
 
+    public String getWebBackofficeStatus() {
+        return PROPERTIES.getProperty("web.backoffice.status");
+    }
+
     public boolean shouldUploadGit() {
         return Boolean.parseBoolean(PROPERTIES.getProperty("always.git"));
     }

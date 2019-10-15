@@ -1,11 +1,6 @@
 package com.mateolegi.util;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 
 public class BidirectionalStream implements AutoCloseable {
 

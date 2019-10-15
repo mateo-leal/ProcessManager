@@ -4,6 +4,7 @@ import com.jcraft.jsch.*;
 import com.mateolegi.sshconnection.exception.SSHConnectionException;
 import com.mateolegi.sshconnection.exception.SSHNotInitializedException;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,8 @@ public class SSHConnectionManager implements AutoCloseable {
         return ret;
     }
 
-    private String getChannelOutput(Channel channel, InputStream in) throws IOException {
+    @NotNull
+    private String getChannelOutput(Channel channel, @NotNull InputStream in) throws IOException {
         var buffer = new byte[1024];
         var strBuilder = new StringBuilder();
         while (true) {
@@ -77,7 +79,6 @@ public class SSHConnectionManager implements AutoCloseable {
                 }
                 var line = new String(buffer, 0, i);
                 strBuilder.append(line);
-                LOGGER.debug(line);
             }
             if (channel.isClosed()) {
                 break;

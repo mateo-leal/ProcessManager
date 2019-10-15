@@ -2,22 +2,19 @@ package com.mateolegi.git.remote.gitlab;
 
 import com.mateolegi.git.remote.GitRemote;
 import com.mateolegi.net.Rest;
-import com.mateolegi.net.RestException;
 
+import java.net.http.HttpResponse;
 import java.util.List;
 
 public class GitLabRemote implements GitRemote {
 
     @Override
     public List<Branch> getRemoteBranches(String endpoint) {
-        try {
-            var rest = new Rest();
-            var response = rest.get(endpoint);
-            var pages = response.getHeader("X-Total-Pages").orElse(null);
-            System.out.println(pages);
-        } catch (RestException e) {
-            e.printStackTrace();
-        }
+        var rest = new Rest();
+        var pages = rest.get(endpoint)
+                .thenApply(HttpResponse::headers)
+                .thenApply(httpHeaders -> httpHeaders.firstValue("X-Total-Pages"));
+        System.out.println(pages);
         return null;
     }
 

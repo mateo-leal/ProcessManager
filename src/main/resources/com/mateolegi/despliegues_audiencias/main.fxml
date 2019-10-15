@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="600.0" maxWidth="950.0" minHeight="600.0" minWidth="950.0" prefHeight="600.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mateolegi.despliegues_audiencias.MainController">
+  <children>
+    <SplitPane dividerPositions="0.2505567928730512" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+      <items>
+        <AnchorPane style="-fx-background-color: #F2F2F2;">
+          <children>
+            <Label id="lblTitle" alignment="CENTER" layoutX="14.0" layoutY="14.0" minWidth="60.0" prefWidth="-1.0" style="&#10;" text="Despliegues" textAlignment="CENTER" wrapText="false">
+              <font>
+                <Font size="18.0" fx:id="x1" />
+              </font>
+              <textFill>
+                <Color blue="0.624" green="0.624" red="0.624" fx:id="x2" />
+              </textFill>
+            </Label>
+                  <Button fx:id="btnGenerateDeploy" layoutX="18.0" layoutY="180.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="GENERAR DESPLIEGUE" textFill="WHITE" userData="home.fxml" />
+                  <Button id="btnRestoreDeploy" layoutX="18.0" layoutY="225.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="RESTAURAR DESPLIEGUE" textFill="WHITE" userData="restore-deploy.fxml" />
+                  <Button id="btnStartServices" layoutX="18.0" layoutY="270.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="INICIAR SERVICIOS" textFill="WHITE" userData="start-services.fxml" />
+                  <Button id="btnRestartServices" layoutX="18.0" layoutY="315.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="REINICIAR SERVICIOS" textFill="WHITE" userData="restart-services.fxml" />
+                  <Button id="btnStopServices" layoutX="18.0" layoutY="360.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="DETENER SERVICIOS" textFill="WHITE" userData="stop-services.fxml" />
+                  <Separator layoutX="18.0" layoutY="434.0" prefWidth="200.0" />
+                  <Label layoutX="67.0" layoutY="452.0" text="Estado del servidor" textFill="#707070" />
+                  <Label layoutX="35.0" layoutY="498.0" text="Activo" textFill="#707070" />
+                  <RadioButton fx:id="rbtnAW" disable="true" layoutX="114.0" layoutY="501.0" mnemonicParsing="false" style="-fx-mark-color: #009688;" />
+                  <Label layoutX="112.0" layoutY="482.0" text="AW" textFill="#707070" />
+                  <RadioButton fx:id="rbtnBO" disable="true" layoutX="152.0" layoutY="501.0" mnemonicParsing="false" style="-fx-mark-color: #009688;" />
+                  <Label layoutX="152.0" layoutY="482.0" text="BO" textFill="#707070" />
+                  <Label layoutX="20.0" layoutY="529.0" text="Versión actual" textFill="#707070" />
+                  <Label fx:id="lblActualVersion" layoutX="119.0" layoutY="529.0" text="Cargando..." textFill="#707070" />
+                  <Separator layoutX="18.0" layoutY="561.0" prefWidth="200.0" />
+                  <Label layoutX="105.0" layoutY="570.0" text="v1.0.0" textFill="#707070" />
+          </children>
+        </AnchorPane>
+        <ScrollPane prefHeight="-1.0" prefWidth="-1.0">
+          <content>
+            <AnchorPane id="Content" fx:id="content" minHeight="-1.0" minWidth="-1.0" prefHeight="598.0" prefWidth="707.0" style="-fx-background-color: #FFFFFF;">
+              <children>
+                <Label alignment="CENTER" font="$x1" layoutX="168.0" layoutY="286.0" style="&#10;" text="Seleccione alguna de las opciones de la izquierda" textAlignment="CENTER" textFill="$x2" wrapText="false" />
+              </children>
+            </AnchorPane>
+          </content>
+        </ScrollPane>
+      </items>
+    </SplitPane>
+  </children>
+</VBox>

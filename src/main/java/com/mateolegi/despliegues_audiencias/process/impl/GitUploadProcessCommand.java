@@ -25,7 +25,7 @@ public class GitUploadProcessCommand implements AsyncProcess {
 
     @Override
     public boolean prepare() {
-        if (!Root.get().emitConfirmation(Constants.Event.GIT_CONFIRM)) {
+        if (Root.get().emitConfirmation(Constants.Event.GIT_CONFIRM)) {
             return false;
         }
         LOGGER.debug("Valida que el zip se haya generado.");

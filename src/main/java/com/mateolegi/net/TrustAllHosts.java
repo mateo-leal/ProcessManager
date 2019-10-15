@@ -12,7 +12,7 @@ public class TrustAllHosts {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustAllHosts.class);
 
-    public static void trustAllHosts() {
+    public static SSLContext trustAllHosts() {
         try {
             TrustManager[] trustAllCerts = new TrustManager[] {
                     new X509ExtendedTrustManager() {
@@ -34,8 +34,10 @@ public class TrustAllHosts {
             HostnameVerifier allHostsValid = (hostname, session) -> true;
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            return sc;
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
+        return null;
     }
 }

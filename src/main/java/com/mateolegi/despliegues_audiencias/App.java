@@ -3,18 +3,20 @@ package com.mateolegi.despliegues_audiencias;
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.Event;
 import com.mateolegi.despliegues_audiencias.process.ProcessSet;
+import com.mateolegi.util.EmitterOutputStream;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.apache.commons.cli.*;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import static com.mateolegi.despliegues_audiencias.constant.Constants.*;
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.STARTUP_ERROR;
@@ -53,7 +55,7 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         STAGE = primaryStage;
         STAGE.setTitle("Generador de despliegues | Audiencias");
-        var scene = new Scene(loadFXML(), PREFERED_WIDTH, PREFERED_HEIGHT);
+        var scene = new Scene(loadFXML(MAIN_FXML), PREFERED_WIDTH, PREFERED_HEIGHT);
         STAGE.setScene(scene);
         STAGE.show();
     }
@@ -70,8 +72,8 @@ public class App extends Application {
         return STAGE;
     }
 
-    private static Parent loadFXML() throws IOException {
-        var fxmlLoader = new FXMLLoader(App.class.getResource(HOME_FXML));
+    static <T> T loadFXML(String fxml) throws IOException {
+        var fxmlLoader = new FXMLLoader(App.class.getResource(fxml));
         return fxmlLoader.load();
     }
 
@@ -110,25 +112,34 @@ public class App extends Application {
                 System.exit(0);
             }
             if (cmd.hasOption("g")) {
+                setSystemOutput();
                 launch();
             } else {
-                if (cmd.getOptions().length == 0) {
-                    var formatter = new HelpFormatter();
-                    formatter.printHelp("Despliegues Audiencias", options);
-                    System.exit(0);
-                }
-                requireDeployNumbers(cmd);
-                Root.get()
-                        .on(Root.PROCESS_FINISHED, event -> {})
-                        .on(Root.SUCCESS, App::onSuccess)
-                        .on(Root.ERROR, App::onError)
-                        .withManager(ProcessSet.getManager())
-                        .run();
+                launchCLI(cmd);
             }
-        } catch (ParseException e) {
+        } catch (ParseException | IOException e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(STARTUP_ERROR);
         }
     }
 
+    private static void launchCLI(@NotNull CommandLine cmd) throws MissingOptionException {
+        if (cmd.getOptions().length == 0) {
+            var formatter = new HelpFormatter();
+            formatter.printHelp("Despliegues Audiencias", options);
+            System.exit(0);
+        }
+        requireDeployNumbers(cmd);
+        Root.get()
+                .on(Root.PROCESS_FINISHED, event -> {})
+                .on(Root.SUCCESS, App::onSuccess)
+                .on(Root.ERROR, App::onError)
+                .withManager(ProcessSet.getManager())
+                .run();
+    }
+
+    private static void setSystemOutput() throws IOException {
+        var printStream = new PrintStream(new EmitterOutputStream());
+        System.setOut(printStream);
+    }
 }

@@ -135,6 +135,15 @@ public class GitManager {
         }
     }
 
+    public boolean isOpen() {
+        try {
+            requireOpenGitRepo();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private Map<String, Ref> getVersionList(String remotePath) throws GitAPIException {
         var p = Pattern.compile("\\d+\\.\\d+\\.\\d+",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL);

@@ -8,6 +8,7 @@ import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ConfirmBox;
 import com.mateolegi.despliegues_audiencias.util.VersionGetter;
 import com.mateolegi.git.GitManager;
+import com.mateolegi.util.EmitterOutputStream;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -38,28 +39,16 @@ public class HomeController {
     @FXML private ProgressBar progressBar;
     @FXML private Label progressIndicatorLabel;
     @FXML private Button generateButton;
+    @FXML private TextArea txtAreaOutput;
 
     @FXML
     public void initialize() {
         progressIndicatorLabel.textProperty().bind(STRING_PROPERTY);
         deploymentVersionField.setDisable(true);
         generateButton.setDisable(true);
-        new Thread(() -> {
-            Platform.runLater(() -> getStage().getScene().setCursor(Cursor.WAIT));
-            var nextVersion = new GitManager(new File(CONFIGURATION.getOutputDirectory()), CONFIGURATION.getGitUser(),
-                    CONFIGURATION.getGitPassword()).nextVersion(CONFIGURATION.getGitRemote());
-            Platform.runLater(() -> {
-                deploymentVersionField.setText(nextVersion);
-                deploymentVersionField.setDisable(false);
-                generateButton.setDisable(false);
-            });
-            Platform.runLater(() -> getStage().getScene().setCursor(Cursor.DEFAULT));
-        }).start();
-        new Thread(() -> {
-            var versionGetter = new VersionGetter();
-            Platform.runLater(() -> audienciasVersionField.setText(versionGetter.getAudienciasVersion()));
-            Platform.runLater(() -> deploymentNumberField.setText(versionGetter.getAudienciasDeploy()));
-        }).start();
+        initializeTextArea();
+        getNextDeployVersion();
+        getAppVersion();
     }
 
     @FXML
@@ -146,5 +135,31 @@ public class HomeController {
                 .showAndWait()
                 .filter(ButtonType.YES::equals).isPresent()));
         return response.get();
+    }
+
+    private void getNextDeployVersion() {
+        new Thread(() -> {
+            Platform.runLater(() -> getStage().getScene().setCursor(Cursor.WAIT));
+            var nextVersion = new GitManager(new File(CONFIGURATION.getOutputDirectory()), CONFIGURATION.getGitUser(),
+                    CONFIGURATION.getGitPassword()).nextVersion(CONFIGURATION.getGitRemote());
+            Platform.runLater(() -> {
+                deploymentVersionField.setText(nextVersion);
+                deploymentVersionField.setDisable(false);
+                generateButton.setDisable(false);
+            });
+            Platform.runLater(() -> getStage().getScene().setCursor(Cursor.DEFAULT));
+        }).start();
+    }
+
+    private void getAppVersion() {
+        new Thread(() -> {
+            var versionGetter = new VersionGetter();
+            Platform.runLater(() -> audienciasVersionField.setText(versionGetter.getAudienciasVersion()));
+            Platform.runLater(() -> deploymentNumberField.setText(versionGetter.getAudienciasDeploy()));
+        }).start();
+    }
+
+    private void initializeTextArea() {
+        EmitterOutputStream.on(s -> Platform.runLater(() -> txtAreaOutput.appendText(s)));
     }
 }

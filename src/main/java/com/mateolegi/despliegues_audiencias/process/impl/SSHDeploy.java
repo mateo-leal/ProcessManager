@@ -1,5 +1,6 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
+import com.google.gson.Gson;
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.AsyncProcess;
 import com.mateolegi.despliegues_audiencias.constant.Constants;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +44,7 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean prepare() {
-        if (!Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
+        if (Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
             return false;
         }
         try (BidirectionalStream stream = new BidirectionalStream()) {
@@ -127,7 +129,10 @@ public class SSHDeploy implements AsyncProcess {
         var rest = new Rest();
         try {
             setValue("Validando que la versión está desplegada...");
-            var version = rest.get(CONFIGURATION.getWebVersionService()).getBody(VersionResponse.class);
+            var version = rest.get(CONFIGURATION.getWebVersionService())
+                    .thenApply(HttpResponse::body)
+                    .thenApply(s -> new Gson().fromJson(s, VersionResponse.class))
+                    .join();
             return Objects.equals(version.getDespliegue(), Integer.parseInt(getDeploymentNumber()))
                     && Objects.equals(version.getVersion(), getAudienciasVersion());
         } catch (Exception e) {
