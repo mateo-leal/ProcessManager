@@ -3,7 +3,6 @@ package com.mateolegi.despliegues_audiencias;
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.Event;
 import com.mateolegi.despliegues_audiencias.process.ProcessSet;
-import com.mateolegi.util.EmitterOutputStream;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 import static com.mateolegi.despliegues_audiencias.constant.Constants.*;
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.STARTUP_ERROR;
@@ -87,7 +85,7 @@ public class App extends Application {
         return new DefaultParser().parse(options, args);
     }
 
-    private static void requireDeployNumbers(CommandLine cmd) throws MissingOptionException {
+    private static void requireDeployNumbers(@NotNull CommandLine cmd) throws MissingOptionException {
         if (!cmd.hasOption("dv")) {
             throw new MissingOptionException("La opción --deploymentVersion es obligatoria para el CLI");
         }
@@ -112,12 +110,12 @@ public class App extends Application {
                 System.exit(0);
             }
             if (cmd.hasOption("g")) {
-                setSystemOutput();
+//                setSystemOutput();
                 launch();
             } else {
                 launchCLI(cmd);
             }
-        } catch (ParseException | IOException e) {
+        } catch (ParseException e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(STARTUP_ERROR);
         }
@@ -138,8 +136,8 @@ public class App extends Application {
                 .run();
     }
 
-    private static void setSystemOutput() throws IOException {
-        var printStream = new PrintStream(new EmitterOutputStream());
-        System.setOut(printStream);
-    }
+//    private static void setSystemOutput() throws IOException {
+//        var printStream = new PrintStream(new EmitterOutputStream());
+//        System.setOut(printStream);
+//    }
 }

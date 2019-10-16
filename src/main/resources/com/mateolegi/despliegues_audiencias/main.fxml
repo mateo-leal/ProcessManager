@@ -25,11 +25,9 @@
                 <Color blue="0.624" green="0.624" red="0.624" fx:id="x2" />
               </textFill>
             </Label>
-                  <Button fx:id="btnGenerateDeploy" layoutX="18.0" layoutY="180.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="GENERAR DESPLIEGUE" textFill="WHITE" userData="home.fxml" />
-                  <Button id="btnRestoreDeploy" layoutX="18.0" layoutY="225.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="RESTAURAR DESPLIEGUE" textFill="WHITE" userData="restore-deploy.fxml" />
-                  <Button id="btnStartServices" layoutX="18.0" layoutY="270.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="INICIAR SERVICIOS" textFill="WHITE" userData="start-services.fxml" />
-                  <Button id="btnRestartServices" layoutX="18.0" layoutY="315.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="REINICIAR SERVICIOS" textFill="WHITE" userData="restart-services.fxml" />
-                  <Button id="btnStopServices" layoutX="18.0" layoutY="360.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="DETENER SERVICIOS" textFill="WHITE" userData="stop-services.fxml" />
+                  <Button layoutX="18.0" layoutY="180.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="GENERAR DESPLIEGUE" textFill="WHITE" userData="generate-deploy.fxml" />
+                  <Button layoutX="18.0" layoutY="225.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="RESTAURAR DESPLIEGUE" textFill="WHITE" userData="restore-deploy.fxml" />
+                  <Button layoutX="18.0" layoutY="270.0" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setView" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #009688;" text="ADMINISTRAR SERVICIOS" textFill="WHITE" userData="admin-services.fxml" />
                   <Separator layoutX="18.0" layoutY="434.0" prefWidth="200.0" />
                   <Label layoutX="67.0" layoutY="452.0" text="Estado del servidor" textFill="#707070" />
                   <Label layoutX="35.0" layoutY="498.0" text="Activo" textFill="#707070" />

@@ -1,14 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
-import com.google.gson.Gson;
-import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.AsyncProcess;
-import com.mateolegi.despliegues_audiencias.constant.Constants;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
 import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
-import com.mateolegi.despliegues_audiencias.util.VersionResponse;
-import com.mateolegi.net.Rest;
 import com.mateolegi.sshconnection.SSHConnectionManager;
 import com.mateolegi.util.BidirectionalStream;
 import org.apache.commons.io.IOUtils;
@@ -17,15 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.mateolegi.despliegues_audiencias.constant.ProcessCode.DEPLOYMENT_ERROR;
-import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.*;
+import static com.mateolegi.despliegues_audiencias.util.DeployNumbers.getDeploymentVersion;
 import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.SH;
 import static com.mateolegi.despliegues_audiencias.util.ProcessFactory.setValue;
 
@@ -33,7 +24,6 @@ public class SSHDeploy implements AsyncProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SSHDeploy.class);
     private static final Configuration CONFIGURATION = new Configuration();
-    private boolean retry = false;
 
     /**
      * Prepara los archivos y realiza las respectivas validaciones
@@ -44,9 +34,9 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean prepare() {
-        if (Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
-            return false;
-        }
+//        if (!Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
+//            return false;
+//        }
         try (BidirectionalStream stream = new BidirectionalStream()) {
             setValue("Validando que la rama se haya subido...");
             new ProcessFactory(SH, "-c",
@@ -87,16 +77,7 @@ public class SSHDeploy implements AsyncProcess {
                 return DEPLOYMENT_ERROR;
             }
             updateTemplates();
-            restartMemcached();
-            try (var ssh = getSSH()) {
-                setValue("Reinciando servicios...");
-                ssh.runCommand("cd /opt/backoffice/bin/ && sudo -S -p '' ./restart.sh");
-                Thread.sleep(10000);
-                return 0;
-            } catch (Exception e) {
-                LOGGER.error("Ocurrió un error durante el despliegue de la versión.", e);
-                return DEPLOYMENT_ERROR;
-            }
+            return 0;
         });
     }
 
@@ -107,50 +88,6 @@ public class SSHDeploy implements AsyncProcess {
         } catch (Exception e) {
             LOGGER.error("Error actualizando plantillas.", e);
         }
-    }
-
-    private void restartMemcached() {
-        try (var ssh = getSSH()) {
-            setValue("Reiniciando caché del servidor...");
-            ssh.runCommand("sudo service memcached restart");
-        } catch (Exception e) {
-            LOGGER.error("Error reiniciando Memcached.", e);
-        }
-    }
-
-    /**
-     * Valida que el proceso se haya realizado de manera existosa.
-     *
-     * @return {@code true} si el proceso concluyó exitosamente,
-     * de otra manera {@code false}.
-     */
-    @Override
-    public boolean validate() {
-        var rest = new Rest();
-        try {
-            setValue("Validando que la versión está desplegada...");
-            var version = rest.get(CONFIGURATION.getWebVersionService())
-                    .thenApply(HttpResponse::body)
-                    .thenApply(s -> new Gson().fromJson(s, VersionResponse.class))
-                    .join();
-            return Objects.equals(version.getDespliegue(), Integer.parseInt(getDeploymentNumber()))
-                    && Objects.equals(version.getVersion(), getAudienciasVersion());
-        } catch (Exception e) {
-            return startProcess();
-        }
-    }
-
-    private boolean startProcess() {
-        if (!retry) {
-            retry = true;
-            try (var ssh = getSSH()) {
-                setValue("Volviendo a iniciar los servicios...");
-                Executors.newSingleThreadExecutor()
-                        .submit(() -> ssh.runCommand("cd /opt/backoffice/bin/ && sudo -S -p '' ./start.sh"))
-                        .get(1, TimeUnit.MINUTES);
-            } catch (Exception ignored) { }
-        }
-        return validate();
     }
 
     @NotNull

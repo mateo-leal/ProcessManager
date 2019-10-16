@@ -2,6 +2,7 @@ package com.mateolegi.despliegues_audiencias;
 
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.Event;
+import com.mateolegi.despliegues.process.exception.ProcessException;
 import com.mateolegi.despliegues_audiencias.constant.Constants;
 import com.mateolegi.despliegues_audiencias.process.ProcessSet;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
@@ -17,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.mateolegi.despliegues_audiencias.App.getStage;
@@ -88,9 +91,11 @@ public class HomeController {
 
     private void incrementProgressBar(Event e) {
         Platform.runLater(() -> progressBar.setProgress(progressBar.getProgress() + (1d / NUMBER_OF_PROCESS)));
+        Root.get().emit(Constants.Event.RELOAD_STATUS);
     }
 
     private void limpiarVentana(Event e) {
+        Root.get().emit(Constants.Event.RELOAD_STATUS);
         Platform.runLater(() -> {
             new Alert(CONFIRMATION, "La versión de despliegue se generó correctamente.", ButtonType.OK).show();
             deploymentVersionField.setText("");
@@ -105,6 +110,7 @@ public class HomeController {
     }
 
     private void onError(Event e) {
+        Root.get().emit(Constants.Event.RELOAD_STATUS);
         Platform.runLater(() -> {
             new Alert(ERROR, "Ocurrió un error generando la versión de despliegue.\n" +
                     "Por favor revise el log para obtener detalles.", ButtonType.OK).show();
@@ -119,11 +125,15 @@ public class HomeController {
         if (CONFIGURATION.shouldUploadGit()) {
             return true;
         }
-        var response = new AtomicBoolean();
-        Platform.runLater(() -> response.set(new ConfirmBox("¿Desea subir la versión al servidor de Git?")
+        final var query = new FutureTask<>(() -> new ConfirmBox("¿Desea subir la versión al servidor de Git?")
                 .showAndWait()
-                .filter(ButtonType.YES::equals).isPresent()));
-        return response.get();
+                .filter(ButtonType.YES::equals).isPresent());
+        Platform.runLater(query);
+        try {
+            return query.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new ProcessException(ex);
+        }
     }
 
     private boolean onDeployConfirmation(Event e) {

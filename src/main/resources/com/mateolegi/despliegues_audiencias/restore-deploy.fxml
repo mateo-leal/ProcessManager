@@ -109,7 +109,7 @@
       <VBox.margin>
          <Insets left="30.0" right="30.0" top="10.0" />
       </VBox.margin>
-      <Button fx:id="generateButton" mnemonicParsing="false" onAction="#generateDeployment" text="Generar" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+      <Button fx:id="generateButton" mnemonicParsing="false" text="Generar" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
          <GridPane.margin>
             <Insets right="20.0" />
          </GridPane.margin>

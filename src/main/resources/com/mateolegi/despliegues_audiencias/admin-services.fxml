@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="598.0" minWidth="707.0" prefHeight="598.0" prefWidth="707.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mateolegi.despliegues_audiencias.StartServicesController">
+   <Label text="ADMINISTRAR SERVICIOS">
+      <VBox.margin>
+         <Insets left="30.0" top="30.0" />
+      </VBox.margin>
+      <font>
+         <Font size="18.0" />
+      </font>
+   </Label>
+   <Label text="Esta opción cumple la función de gestionar los servicios de Audiencias Web del servidor de pruebas">
+      <VBox.margin>
+         <Insets left="30.0" top="5.0" />
+      </VBox.margin>
+   </Label>
+   <GridPane prefHeight="50.0" prefWidth="647.0">
+      <columnConstraints>
+         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+      <VBox.margin>
+         <Insets left="30.0" right="30.0" top="100.0" />
+      </VBox.margin>
+      <Button fx:id="generateButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="125.0" text="Reiniciar servicios" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </Button>
+      <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="125.0" text="Iniciar servicios" GridPane.halignment="RIGHT" />
+      <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="125.0" text="Detener servicios" GridPane.columnIndex="2" />
+   </GridPane>
+   <TextArea fx:id="txtAreaOutput" editable="false" mouseTransparent="true" prefHeight="345.0" prefWidth="647.0" promptText="&gt;_" stylesheets="@generate-deploy.css">
+      <VBox.margin>
+         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+      </VBox.margin>
+   </TextArea>
+</VBox>

@@ -14,14 +14,30 @@
 <?import javafx.scene.text.Font?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="598.0" minWidth="707.0" prefHeight="598.0" prefWidth="707.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mateolegi.despliegues_audiencias.HomeController">
-   <Label text="GENERAR DESPLIEGUE">
+   <GridPane>
+     <columnConstraints>
+       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+     </columnConstraints>
+     <rowConstraints>
+       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+     </rowConstraints>
+      <children>
+         <Label text="GENERAR DESPLIEGUE">
+            <font>
+               <Font size="18.0" />
+            </font>
+         </Label>
+         <Button mnemonicParsing="false" onAction="#initialize" text="Recargar" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+            <GridPane.margin>
+               <Insets right="20.0" />
+            </GridPane.margin>
+         </Button>
+      </children>
       <VBox.margin>
-         <Insets left="30.0" top="30.0" />
+         <Insets left="30.0" right="30.0" top="30.0" />
       </VBox.margin>
-      <font>
-         <Font size="18.0" />
-      </font>
-   </Label>
+   </GridPane>
    <HBox prefHeight="37.0" prefWidth="350.0">
       <opaqueInsets>
          <Insets />

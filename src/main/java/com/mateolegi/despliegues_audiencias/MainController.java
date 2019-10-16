@@ -1,6 +1,7 @@
 package com.mateolegi.despliegues_audiencias;
 
 import com.google.gson.Gson;
+import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.VersionResponse;
 import com.mateolegi.net.Rest;
@@ -20,6 +21,8 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.mateolegi.despliegues_audiencias.constant.Constants.Event.RELOAD_STATUS;
+
 public class MainController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
@@ -33,8 +36,10 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        loadActualVersion();
-        loadBackofficeStatus();
+        reloadStatus();
+        Root.get().on(RELOAD_STATUS, event -> {
+            reloadStatus();
+        });
     }
 
     public void setView(@NotNull ActionEvent event) throws IOException {
@@ -51,6 +56,11 @@ public class MainController {
         } else {
             children.add(newContent);
         }
+    }
+
+    private void reloadStatus() {
+        loadBackofficeStatus();
+        loadActualVersion();
     }
 
     private void loadBackofficeStatus() {
