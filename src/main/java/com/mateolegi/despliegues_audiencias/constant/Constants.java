@@ -12,5 +12,6 @@ public class Constants {
         public static final String GIT_CONFIRM = "Git confirm";
         public static final String DEPLOY_CONFIRM = "Deploy confirm";
         public static final String RELOAD_STATUS = "Reload status";
+        public static final String LOG_OUTPUT = "Log output";
     }
 }

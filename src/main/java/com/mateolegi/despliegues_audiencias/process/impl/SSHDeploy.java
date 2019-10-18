@@ -1,6 +1,9 @@
 package com.mateolegi.despliegues_audiencias.process.impl;
 
+import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.AsyncProcess;
+import com.mateolegi.despliegues.process.Event;
+import com.mateolegi.despliegues_audiencias.constant.Constants;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.DeployNumbers;
 import com.mateolegi.despliegues_audiencias.util.ProcessFactory;
@@ -34,9 +37,9 @@ public class SSHDeploy implements AsyncProcess {
      */
     @Override
     public boolean prepare() {
-//        if (!Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
-//            return false;
-//        }
+        if (Event.Confirmation.APPROVED != Root.get().emitConfirmation(Constants.Event.DEPLOY_CONFIRM)) {
+            return false;
+        }
         try (BidirectionalStream stream = new BidirectionalStream()) {
             setValue("Validando que la rama se haya subido...");
             new ProcessFactory(SH, "-c",

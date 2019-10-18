@@ -19,7 +19,7 @@ public class Root {
 
     private static Root INSTANCE;
     private final MultiValuedMap<String, Consumer<Event>> events = new ArrayListValuedHashMap<>();
-    private final Map<String, Function<Event, Boolean>> confirmationEvents = new HashMap<>();
+    private final Map<String, Function<Event, Event.Confirmation>> confirmationEvents = new HashMap<>();
     private AsyncManager manager;
 
     private Root() {}
@@ -45,7 +45,7 @@ public class Root {
         return this;
     }
 
-    public Root on(String event, Function<Event, Boolean> then) {
+    public Root on(String event, Function<Event, Event.Confirmation> then) {
         confirmationEvents.put(event, then);
         return this;
     }
@@ -65,12 +65,12 @@ public class Root {
         events.get(event).forEach(then -> then.accept(ev));
     }
 
-    public boolean emitConfirmation(String event) {
-        return confirmationEvents.getOrDefault(event, __ -> false).apply(new Event());
+    public Event.Confirmation emitConfirmation(String event) {
+        return confirmationEvents.getOrDefault(event, __ -> Event.Confirmation.NOT_EXISTING_EVENT).apply(new Event());
     }
 
-    public boolean emitConfirmation(String event, Event args) {
-        return confirmationEvents.getOrDefault(event, __ -> false).apply(args);
+    public Event.Confirmation emitConfirmation(String event, Event args) {
+        return confirmationEvents.getOrDefault(event, __ -> Event.Confirmation.NOT_EXISTING_EVENT).apply(args);
     }
 
     public AsyncManager withManager(AsyncManager manager) {

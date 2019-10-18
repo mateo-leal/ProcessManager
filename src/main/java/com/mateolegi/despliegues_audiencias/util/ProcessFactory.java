@@ -1,11 +1,14 @@
 package com.mateolegi.despliegues_audiencias.util;
 
+import com.mateolegi.despliegues.Root;
+import com.mateolegi.despliegues_audiencias.constant.Constants;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Map;
 import java.util.Objects;
 
 public class ProcessFactory {
@@ -19,6 +22,7 @@ public class ProcessFactory {
     public static void setValue(String value) {
         try {
             Platform.runLater(() -> STRING_PROPERTY.setValue(value));
+            Root.get().emit(Constants.Event.LOG_OUTPUT, Map.of("content", value + "\n"));
         } catch (IllegalStateException e) {
             LOGGER.warn(e.getMessage());
         }

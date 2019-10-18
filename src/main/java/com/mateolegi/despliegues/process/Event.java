@@ -11,6 +11,10 @@ public class Event {
 
     private Map<String, Object> args = new HashMap<>();
 
+    public enum Confirmation {
+        APPROVED, DENIED, NOT_EXISTING_EVENT
+    }
+
     public Event() { }
 
     public Event(Map<String, Object> args) {
@@ -20,7 +24,7 @@ public class Event {
     public Map<String, Object> getArgs() {
         return args;
     }
-    public Object getArg(String name) {
+    public Optional<Object> getArg(String name) {
         return Optional.ofNullable(this.args.get(name));
     }
 

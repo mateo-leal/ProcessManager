@@ -16,16 +16,21 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLSession;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static com.mateolegi.despliegues_audiencias.constant.Constants.Event.RELOAD_STATUS;
 
 public class MainController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
+//    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
     private static final Configuration CONFIGURATION = new Configuration();
     private static Map<String, Pane> tabs = new HashMap<>();
 
@@ -36,7 +41,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        reloadStatus();
+        startReloadStatusJob();
         Root.get().on(RELOAD_STATUS, event -> {
             reloadStatus();
         });
@@ -58,13 +63,29 @@ public class MainController {
         }
     }
 
+    private void startReloadStatusJob() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                reloadStatus();
+            }
+        }, 0, 15000);
+    }
+
     private void reloadStatus() {
-        loadBackofficeStatus();
-        loadActualVersion();
+        try {
+            loadBackofficeStatus();
+            loadActualVersion();
+        } catch (Exception ignored) {}
     }
 
     private void loadBackofficeStatus() {
         new Thread(() -> new Rest().get(CONFIGURATION.getWebBackofficeStatus())
+//                .exceptionally(throwable -> HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8).)
+                .thenApply(response -> {
+                    System.out.println(response.statusCode());
+                    return response;
+                })
                 .thenApply(HttpResponse::body)
                 .thenAccept(s -> rbtnBO.setSelected(s.equals("OK")))
                 .join())

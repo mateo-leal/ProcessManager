@@ -2,6 +2,7 @@ package com.mateolegi.despliegues_audiencias.process.impl;
 
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.AsyncProcess;
+import com.mateolegi.despliegues.process.Event;
 import com.mateolegi.despliegues_audiencias.constant.Constants;
 import com.mateolegi.despliegues_audiencias.constant.ProcessCode;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
@@ -25,7 +26,7 @@ public class GitUploadProcessCommand implements AsyncProcess {
 
     @Override
     public boolean prepare() {
-        if (!Root.get().emitConfirmation(Constants.Event.GIT_CONFIRM)) {
+        if (Event.Confirmation.APPROVED != Root.get().emitConfirmation(Constants.Event.GIT_CONFIRM)) {
             return false;
         }
         LOGGER.debug("Valida que el zip se haya generado.");

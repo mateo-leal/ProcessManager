@@ -2,24 +2,21 @@ package com.mateolegi.despliegues_audiencias;
 
 import com.mateolegi.despliegues.Root;
 import com.mateolegi.despliegues.process.Event;
-import com.mateolegi.despliegues.process.exception.ProcessException;
 import com.mateolegi.despliegues_audiencias.constant.Constants;
 import com.mateolegi.despliegues_audiencias.process.ProcessSet;
 import com.mateolegi.despliegues_audiencias.util.Configuration;
 import com.mateolegi.despliegues_audiencias.util.ConfirmBox;
 import com.mateolegi.despliegues_audiencias.util.VersionGetter;
 import com.mateolegi.git.GitManager;
-import com.mateolegi.util.EmitterOutputStream;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.mateolegi.despliegues_audiencias.App.getStage;
@@ -49,7 +46,6 @@ public class HomeController {
         progressIndicatorLabel.textProperty().bind(STRING_PROPERTY);
         deploymentVersionField.setDisable(true);
         generateButton.setDisable(true);
-        initializeTextArea();
         getNextDeployVersion();
         getAppVersion();
     }
@@ -59,12 +55,13 @@ public class HomeController {
         setData();
         disableFields(true);
         Platform.runLater(() -> getStage().getScene().setCursor(Cursor.WAIT));
-        Root.get()
+        Root.newRoot()
                 .on(Root.PROCESS_FINISHED, this::incrementProgressBar)
                 .on(Root.SUCCESS, this::limpiarVentana)
                 .on(Root.ERROR, this::onError)
                 .on(Constants.Event.GIT_CONFIRM, this::onGitConfirmation)
                 .on(Constants.Event.DEPLOY_CONFIRM, this::onDeployConfirmation)
+                .on(Constants.Event.LOG_OUTPUT, this::displayOnTextArea)
                 .withManager(ProcessSet.getManager())
                 .run();
     }
@@ -121,30 +118,26 @@ public class HomeController {
         });
     }
 
-    private boolean onGitConfirmation(Event e) {
-        if (CONFIGURATION.shouldUploadGit()) {
-            return true;
+    private Event.Confirmation onGitConfirmation(Event e) {
+        if (CONFIGURATION.shouldUploadGit() != null) {
+            return CONFIGURATION.shouldUploadGit() ? Event.Confirmation.APPROVED : Event.Confirmation.DENIED;
         }
-        final var query = new FutureTask<>(() -> new ConfirmBox("¿Desea subir la versión al servidor de Git?")
+        var response = new AtomicBoolean();
+        Platform.runLater(() -> response.set(new ConfirmBox("¿Desea subir la versión al servidor de Git?")
                 .showAndWait()
-                .filter(ButtonType.YES::equals).isPresent());
-        Platform.runLater(query);
-        try {
-            return query.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            throw new ProcessException(ex);
-        }
+                .filter(ButtonType.YES::equals).isPresent()));
+        return response.get() ? Event.Confirmation.APPROVED : Event.Confirmation.DENIED;
     }
 
-    private boolean onDeployConfirmation(Event e) {
-        if (CONFIGURATION.shouldDeploy()) {
-            return true;
+    private Event.Confirmation onDeployConfirmation(Event e) {
+        if (CONFIGURATION.shouldDeploy() != null) {
+            return CONFIGURATION.shouldDeploy() ? Event.Confirmation.APPROVED : Event.Confirmation.DENIED;
         }
         var response = new AtomicBoolean();
         Platform.runLater(() -> response.set(new ConfirmBox("¿Desea desplegar la versión en el servidor de pruebas?")
                 .showAndWait()
                 .filter(ButtonType.YES::equals).isPresent()));
-        return response.get();
+        return response.get() ? Event.Confirmation.APPROVED : Event.Confirmation.DENIED;
     }
 
     private void getNextDeployVersion() {
@@ -169,7 +162,7 @@ public class HomeController {
         }).start();
     }
 
-    private void initializeTextArea() {
-        EmitterOutputStream.on(s -> Platform.runLater(() -> txtAreaOutput.appendText(s)));
+    private void displayOnTextArea(@NotNull Event event) {
+        event.getArg("content").ifPresent(o -> Platform.runLater(() -> txtAreaOutput.appendText((String) o)));
     }
 }

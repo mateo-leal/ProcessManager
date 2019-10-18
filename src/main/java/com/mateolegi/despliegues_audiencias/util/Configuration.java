@@ -86,12 +86,20 @@ public class Configuration {
         return PROPERTIES.getProperty("web.backoffice.status");
     }
 
-    public boolean shouldUploadGit() {
-        return Boolean.parseBoolean(PROPERTIES.getProperty("always.git"));
+    public Boolean shouldUploadGit() {
+        var resp = PROPERTIES.getProperty("always.git");
+        if (resp != null) {
+            return Boolean.parseBoolean(resp);
+        }
+        return null;
     }
 
-    public boolean shouldDeploy() {
-        return Boolean.parseBoolean(PROPERTIES.getProperty("always.deploy"));
+    public Boolean shouldDeploy() {
+        var resp = PROPERTIES.getProperty("always.deploy");
+        if (resp != null) {
+            return Boolean.parseBoolean(resp);
+        }
+        return null;
     }
 
     private void loadPropertiesFile() throws IOException {
